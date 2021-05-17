@@ -44,7 +44,7 @@ configfile:
 R1SUFFIX = config['R1_suffix']
 R2SUFFIX = config['R2_suffix']
 
-SAMPLES, = glob_wildcards(config['normal'] + "/{sample}" + R1SUFFIX)
+SAMPLES, = glob_wildcards(config['tumor'] + "/{sample}" + R1SUFFIX)
 RESULTS = config['workdir'] + '/{sample}/'
 BAMS = RESULTS + 'bams/'
 LOGS = RESULTS + 'logs/'
@@ -67,7 +67,7 @@ n = {}
 t = {}
 
 for sample in SAMPLES:
-    id_maker(config['normal'], '/', sample, R1SUFFIX, n)
+    #id_maker(config['normal'], '/', sample, R1SUFFIX, n)
     id_maker(config['tumor'], '/', sample, R1SUFFIX, t)
 #print(n)
 #print(t)
@@ -76,17 +76,17 @@ for sample in SAMPLES:
 # Rules -----------------------------------------------------------------------
 rule all:
     input:
-        normal_bam = expand(BAMS + "{sample}.normal_sorted.bam", sample=SAMPLES),
+        #normal_bam = expand(BAMS + "{sample}.normal_sorted.bam", sample=SAMPLES),
         tumor_bam = expand(BAMS + "{sample}.tumor_sorted.bam", sample=SAMPLES),
-        normal_ml = expand(LOGS + '{sample}.normal_metrics.log', sample=SAMPLES),
+        #normal_ml = expand(LOGS + '{sample}.normal_metrics.log', sample=SAMPLES),
         tumor_ml = expand(LOGS + '{sample}.tumor_metrics.log', sample=SAMPLES),
-        normal_deduped = expand(BAMS + '{sample}.normal_deduped.bam', sample=SAMPLES),
+        #normal_deduped = expand(BAMS + '{sample}.normal_deduped.bam', sample=SAMPLES),
         tumor_deduped = expand(BAMS + '{sample}.tumor_deduped.bam', sample=SAMPLES),
-        normal_rdt = expand(RECAL + '{sample}.normal_recal_data.table', sample=SAMPLES),
+        #normal_rdt = expand(RECAL + '{sample}.normal_recal_data.table', sample=SAMPLES),
         tumor_rdt = expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
         vcf = expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES)
 
-
+'''
 rule mapping_normal:
     input:
         R1 = config['normal'] + "/{sample}" + R1SUFFIX,
@@ -113,7 +113,7 @@ rule mapping_normal:
         sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
         """
-
+'''
 
 rule mapping_tumor:
     input:
@@ -141,7 +141,7 @@ rule mapping_tumor:
         sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
         """
 
-
+'''
 rule metrics_normal:
     input:
         bam = rules.mapping_normal.output.bam,
@@ -169,7 +169,7 @@ rule metrics_normal:
         sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
         sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
-
+'''
 
 rule metrics_tumor:
     input:
@@ -199,7 +199,7 @@ rule metrics_tumor:
         sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
 
-
+'''
 rule markdup_normal:
     input:
         bam = rules.mapping_normal.output.bam,
@@ -219,7 +219,7 @@ rule markdup_normal:
         sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
         sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
-
+'''
 
 rule markdup_tumor:
     input:
@@ -241,7 +241,7 @@ rule markdup_tumor:
         sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
-
+'''
 rule baserecal_normal:
     input:
         bam = rules.markdup_normal.output.bam,
@@ -263,7 +263,7 @@ rule baserecal_normal:
         sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
         sentieon plot QualCal -o {output.rp} {output.recal}
         """
-
+'''
 
 rule baserecal_tumor:
     input:
@@ -291,22 +291,23 @@ rule baserecal_tumor:
 rule variant_calling:
     input:
         tumor_bam = rules.markdup_tumor.output.bam,
-        normal_bam = rules.markdup_normal.output.bam,
+        #normal_bam = rules.markdup_normal.output.bam,
         tumor_rdt = rules.baserecal_tumor.output.rdt,
-        normal_rdt = rules.baserecal_normal.output.rdt
+        #normal_rdt = rules.baserecal_normal.output.rdt
     output:
         vcf = RESULTS + '{sample}.tnscope.vcf.gz',
     params:
         tumor_sample = '{sample}_tumor',
-        normal_sample = '{sample}_normal'
+        #normal_sample = '{sample}_normal'
     log:
         LOGS + '{sample}.tnscope.log'
     threads:
         48 # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
+        sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -q {input.tumor_rdt} --algo TNscope --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
+        #sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
 
 
 #############################
@@ -320,3 +321,5 @@ rule variant_calling:
 
 # Prints SAM into log file and @RG is still not properly written in sorted BAM
 #( sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} || echo -n "error" ) >> {log} 2>&1 | sentieon util sort -o {output.bam} -t {threads} --sam2bam -i - >> {log} 2>&1
+
+# Modified by Massimiliano Volpe on 12/05/2021 to test the tumor-only pipeline.
