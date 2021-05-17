@@ -32,7 +32,14 @@ def id_maker(path, sep, sample, suffix, d):
 
 
 # Globals ---------------------------------------------------------------------
+
+# Getting Sentieon license server running
+# start licence server
 import subprocess
+# subprocess.call("/home/rada/miniconda3/pkgs/sentieon-201808.08-h14580f3_0/bin/sentieon licsrvr --start --log /home/rada/Documents/Sentieon/logs/log.txt /home/rada/Documents/Sentieon/licence/GMC_SOR_usb127.lic")
+# Update with the location of the Sentieon software package and license file
+# subprocess.call("export SENTIEON_INSTALL_DIR=/home/rada/miniconda3/pkgs/sentieon-201808.08-h14580f3_0")
+# subprocess.call("export SENTIEON_LICENSE=Idril:8080")
 
 configfile:
     "config.json"
