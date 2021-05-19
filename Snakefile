@@ -40,6 +40,7 @@ import subprocess
 # Update with the location of the Sentieon software package and license file
 # subprocess.call("export SENTIEON_INSTALL_DIR=/home/rada/miniconda3/pkgs/sentieon-201808.08-h14580f3_0")
 # subprocess.call("export SENTIEON_LICENSE=Idril:8080")
+shell.prefix('export SENTIEON_INSTALL={}; export SENTIEON_LICENSE={}; export SENTIEON_TMPDIR={};'.format(config['params']['sentieon_install'], config['params']['sentieon_license'], config['params']['tmp_dir']))
 
 configfile:
     "config.json"
