@@ -1,0 +1,5 @@
+fastqs/*
+!fastqs/README.md
+
+references/*
+!references/README.md
