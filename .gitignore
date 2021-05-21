@@ -3,3 +3,5 @@ fastqs/*
 
 references/*
 !references/README.md
+
+.snakemake
