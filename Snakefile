@@ -33,17 +33,15 @@ def id_maker(path, sep, sample, suffix, d):
 
 # Globals ---------------------------------------------------------------------
 
+configfile:
+    "config.yml"
+
 # Getting Sentieon license server running
 # start licence server
-import subprocess
-# subprocess.call("/home/rada/miniconda3/pkgs/sentieon-201808.08-h14580f3_0/bin/sentieon licsrvr --start --log /home/rada/Documents/Sentieon/logs/log.txt /home/rada/Documents/Sentieon/licence/GMC_SOR_usb127.lic")
 # Update with the location of the Sentieon software package and license file
-# subprocess.call("export SENTIEON_INSTALL_DIR=/home/rada/miniconda3/pkgs/sentieon-201808.08-h14580f3_0")
-# subprocess.call("export SENTIEON_LICENSE=Idril:8080")
-shell.prefix('export SENTIEON_INSTALL={}; export SENTIEON_LICENSE={}; export SENTIEON_TMPDIR={};'.format(config['params']['sentieon_install'], config['params']['sentieon_license'], config['params']['tmp_dir']))
+shell.prefix('export SENTIEON_INSTALL={}; export SENTIEON_LICENSE={}; export SENTIEON_TMPDIR={}; $SENTIEON_INSTALL/bin/sentieon licsrvr --start --log logs/logs.txt $SENTIEON_LICENSE;'.format(config['params']['sentieon_install'], config['params']['sentieon_license'], config['params']['tmp_dir']))
 
-configfile:
-    "config.json"
+import subprocess
 
 #workdir:
 #    config['workdir']
@@ -114,12 +112,12 @@ rule mapping_normal:
         SM = "{sample}_normal",
         PL = config["platform"]
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
-        # sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
-        sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
         """
 '''
 
@@ -141,12 +139,12 @@ rule mapping_tumor:
         SM = "{sample}_tumor",
         PL = config["platform"]
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
-        # sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
-        sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
         """
 
 '''
@@ -168,14 +166,14 @@ rule metrics_normal:
     log:
         LOGS + '{sample}.normal_metrics.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
-        sentieon plot GCBias -o {output.gcp} {output.gcm}
-        sentieon plot QualDistribution -o {output.qdp} {output.qdm}
-        sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
-        sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon plot GCBias -o {output.gcp} {output.gcm}
+        $SENTIEON_INSTALL/bin/sentieon plot QualDistribution -o {output.qdp} {output.qdm}
+        $SENTIEON_INSTALL/bin/sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
+        $SENTIEON_INSTALL/bin/sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
 '''
 
@@ -197,14 +195,14 @@ rule metrics_tumor:
     log:
         LOGS + '{sample}.tumor_metrics.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
-        sentieon plot GCBias -o {output.gcp} {output.gcm}
-        sentieon plot QualDistribution -o {output.qdp} {output.qdm}
-        sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
-        sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon plot GCBias -o {output.gcp} {output.gcm}
+        $SENTIEON_INSTALL/bin/sentieon plot QualDistribution -o {output.qdp} {output.qdm}
+        $SENTIEON_INSTALL/bin/sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
+        $SENTIEON_INSTALL/bin/sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
 
 '''
@@ -220,12 +218,12 @@ rule markdup_normal:
     log:
         LOGS + '{sample}.normal_dedup.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
-        sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
-        sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 '''
 
@@ -241,12 +239,12 @@ rule markdup_tumor:
     log:
         LOGS + '{sample}.tumor_dedup.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
-        sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
-        sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
 '''
@@ -263,13 +261,13 @@ rule baserecal_normal:
     log:
         LOGS + '{sample}.normal_recal.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
-        sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
-        sentieon plot QualCal -o {output.rp} {output.recal}
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon plot QualCal -o {output.rp} {output.recal}
         """
 '''
 
@@ -286,13 +284,13 @@ rule baserecal_tumor:
     log:
         LOGS + '{sample}.tumor_recal.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
-        sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
-        sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
-        sentieon plot QualCal -o {output.rp} {output.recal}
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon plot QualCal -o {output.rp} {output.recal}
         """
 
 
@@ -310,12 +308,12 @@ rule variant_calling:
     log:
         LOGS + '{sample}.tnscope.log'
     threads:
-        48 # set the maximum number of available cores
+        config['cpus'] # set the maximum number of available cores
     shell:
         """
-        sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -q {input.tumor_rdt} --algo TNscope --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -q {input.tumor_rdt} --algo TNscope --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
-        #sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
+        #$SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
 
 
 #############################
