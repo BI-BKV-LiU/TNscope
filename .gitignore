@@ -5,3 +5,8 @@ references/*
 !references/README.md
 
 .snakemake
+
+# Results
+PVAL_66_S3
+# Logs
+logs
