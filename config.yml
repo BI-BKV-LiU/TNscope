@@ -12,3 +12,4 @@ params:
         sentieon_install: "/home/rada/Documents/sentieon-genomics-202010.02"
         sentieon_license: "/home/rada/Documents/Sentieon/licence/GMC_SOR_usb127.lic"
         tmp_dir: "/home/rada/Documents/TNscope/logs"
+cpus: 90
