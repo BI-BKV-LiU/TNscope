@@ -39,9 +39,11 @@ configfile:
 # Getting Sentieon license server running
 # start licence server
 # Update with the location of the Sentieon software package and license file
-shell.prefix('export SENTIEON_INSTALL={}; export SENTIEON_LICENSE={}; export SENTIEON_TMPDIR={}; $SENTIEON_INSTALL/bin/sentieon licsrvr --start --log logs/logs.txt $SENTIEON_LICENSE;'.format(config['params']['sentieon_install'], config['params']['sentieon_license'], config['params']['tmp_dir']))
+shell.prefix(f"export SENTIEON_INSTALL={config['params']['sentieon_install']}; export SENTIEON_LICENSE={config['params']['sentieon_license']}; export SENTIEON_TMPDIR={config['params']['tmp_dir']};")
 
 import subprocess
+
+subprocess.run(config['params']['sentieon_install'] + "/bin/sentieon licsrvr --start --log logs/logs.txt " + config['params']['sentieon_license'], shell=True)
 
 #workdir:
 #    config['workdir']
