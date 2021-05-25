@@ -36,6 +36,9 @@ def id_maker(path, sep, sample, suffix, d):
 configfile:
     "config.yml"
 
+# In case cpus is given by the user convert it to int
+cpus = int(config['cpus'])
+
 # Getting Sentieon license server running
 # start licence server
 # Update with the location of the Sentieon software package and license file
@@ -114,7 +117,7 @@ rule mapping_normal:
         SM = "{sample}_normal",
         PL = config["platform"]
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
@@ -141,7 +144,7 @@ rule mapping_tumor:
         SM = "{sample}_tumor",
         PL = config["platform"]
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
@@ -168,7 +171,7 @@ rule metrics_normal:
     log:
         LOGS + '{sample}.normal_metrics.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
@@ -197,7 +200,7 @@ rule metrics_tumor:
     log:
         LOGS + '{sample}.tumor_metrics.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
@@ -220,7 +223,7 @@ rule markdup_normal:
     log:
         LOGS + '{sample}.normal_dedup.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
@@ -241,7 +244,7 @@ rule markdup_tumor:
     log:
         LOGS + '{sample}.tumor_dedup.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
@@ -263,7 +266,7 @@ rule baserecal_normal:
     log:
         LOGS + '{sample}.normal_recal.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
@@ -286,7 +289,7 @@ rule baserecal_tumor:
     log:
         LOGS + '{sample}.tumor_recal.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
@@ -310,7 +313,7 @@ rule variant_calling:
     log:
         LOGS + '{sample}.tnscope.log'
     threads:
-        config['cpus'] # set the maximum number of available cores
+        cpus # set the maximum number of available cores
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -q {input.tumor_rdt} --algo TNscope --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
