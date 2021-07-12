@@ -48,9 +48,6 @@ import subprocess
 
 subprocess.run(config['params']['sentieon_install'] + "/bin/sentieon licsrvr --start --log logs/logs.txt " + config['params']['sentieon_license'], shell=True)
 
-#workdir:
-#    config['workdir']
-
 
 R1SUFFIX = config['R1_suffix']
 R2SUFFIX = config['R2_suffix']
@@ -70,18 +67,12 @@ known_Mills_indels = config['known_Mills_indels']
 known_1000G_indels = config['known_1000G_indels']
 
 
-#for sample in SAMPLES:
-# f = "".join([config['normal'], '/', sample, '_R1_001.fastq.gz'])
-# l = subprocess.check_output("zcat " + f + " | head -n 1 | cut -d ':' -f 4 | sed  s/:/./ | sed 's/@//'", shell=True).strip().decode()
-# d[sample] = '.'.join([sample, l])
-n = {}
 t = {}
 
 for sample in SAMPLES:
-    #id_maker(config['normal'], '/', sample, R1SUFFIX, n)
     id_maker(config['tumor'], '/', sample, R1SUFFIX, t)
-#print(n)
-#print(t)
+
+print(t)
 
 
 # Rules -----------------------------------------------------------------------
@@ -97,34 +88,8 @@ rule all:
         tumor_rdt = expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
         vcf = expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES)
 
-'''
-rule mapping_normal:
-    input:
-        R1 = config['normal'] + "/{sample}" + R1SUFFIX,
-        R2 = config['normal'] + "/{sample}" + R2SUFFIX,
-        fasta = config['fasta']
-    output:
-        sam = temp(BAMS + '{sample}.normal.sam'),
-        bam = BAMS + '{sample}.normal_sorted.bam'
-    log:
-        bwa = LOGS + '{sample}.normal_bwa.log',
-        sort = LOGS + '{sample}.normal_sort.log'
-    params:
-        #ID = subprocess.check_output("zcat {input.R1} | head -n 1 | cut -d ':' -f 1,4 | sed  s/:/./ | sed 's/@//'", shell=True).strip().decode(),
-        #R = "@RG\\tID:" + config["normal_group"] + "\\tSM:{sample}_normal\\tPL:" + config["platform"]
-        K = 10000000,
-        ID = lambda wildcards: n[wildcards.sample],
-        SM = "{sample}_normal",
-        PL = config["platform"]
-    threads:
-        cpus # set the maximum number of available cores
-    shell:
-        # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        """
-        $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
-        """
-'''
+
+
 
 rule mapping_tumor:
     input:
@@ -152,35 +117,6 @@ rule mapping_tumor:
         $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
         """
 
-'''
-rule metrics_normal:
-    input:
-        bam = rules.mapping_normal.output.bam,
-        fasta = config['fasta']
-    output:
-        mqm = METRICS + '{sample}.normal_mq_metrics.txt',
-        qdm = METRICS + '{sample}.normal_qd_metrics.txt',
-        gcs = METRICS + '{sample}.normal_gc_summary.txt',
-        gcm = METRICS + '{sample}.normal_gc_metrics.txt',
-        aln = METRICS + '{sample}.normal_aln_metrics.txt',
-        ism = METRICS + '{sample}.normal_is_metrics.txt',
-        gcp = PLOTS + '{sample}.normal_gc-report.pdf',
-        qdp = PLOTS + '{sample}.normal_qd-report.pdf',
-        mqp = PLOTS + '{sample}.normal_mq-report.pdf',
-        isp = PLOTS + '{sample}.normal_is-report.pdf'
-    log:
-        LOGS + '{sample}.normal_metrics.log'
-    threads:
-        cpus # set the maximum number of available cores
-    shell:
-        """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon plot GCBias -o {output.gcp} {output.gcm}
-        $SENTIEON_INSTALL/bin/sentieon plot QualDistribution -o {output.qdp} {output.qdm}
-        $SENTIEON_INSTALL/bin/sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
-        $SENTIEON_INSTALL/bin/sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
-        """
-'''
 
 rule metrics_tumor:
     input:
@@ -210,27 +146,6 @@ rule metrics_tumor:
         $SENTIEON_INSTALL/bin/sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
 
-'''
-rule markdup_normal:
-    input:
-        bam = rules.mapping_normal.output.bam,
-        fasta = config['fasta']
-    output:
-        ns = MARKDUP + '{sample}.normal_score.txt',
-        dm = MARKDUP + '{sample}.normal_dedup_metrics.txt',
-        bam = BAMS + '{sample}.normal_deduped.bam',
-        cm = MARKDUP + '{sample}.normal_coverage_metrics'
-    log:
-        LOGS + '{sample}.normal_dedup.log'
-    threads:
-        cpus # set the maximum number of available cores
-    shell:
-        """
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
-        """
-'''
 
 rule markdup_tumor:
     input:
@@ -252,29 +167,6 @@ rule markdup_tumor:
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
-'''
-rule baserecal_normal:
-    input:
-        bam = rules.markdup_normal.output.bam,
-        fasta = config['fasta']
-    output:
-        rdt = RECAL + '{sample}.normal_recal_data.table',
-        post = RECAL + '{sample}.normal_recal_data.table.post',
-        recal = RECAL + '{sample}.normal_recal.csv',
-        rp = PLOTS + '{sample}.normal_recal_plots.pdf',
-
-    log:
-        LOGS + '{sample}.normal_recal.log'
-    threads:
-        cpus # set the maximum number of available cores
-    shell:
-        """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon plot QualCal -o {output.rp} {output.recal}
-        """
-'''
 
 rule baserecal_tumor:
     input:
