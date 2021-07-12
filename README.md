@@ -18,3 +18,5 @@ __Developed on behalf of the Bioinformatics Core Facility, Linköping University
 
 
 Some reference files can also be downloaded from [Google Cloud](https://console.cloud.google.com/storage/browser/gcp-public-data--broad-references/hg19/v0?pageState=(%22StorageObjectListTable%22:(%22f%22:%22%255B%255D%22))&prefix=&forceOnObjectsSortingFiltering=false 'Link to the resource').
+
+The pipeline uses [Sentieon v. 202010.02](https://support.sentieon.com/versions/202010.02/manual/).
