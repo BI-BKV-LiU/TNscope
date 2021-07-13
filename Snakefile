@@ -89,8 +89,6 @@ rule all:
         vcf = expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES)
 
 
-
-
 rule mapping_tumor:
     input:
         R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
@@ -113,8 +111,16 @@ rule mapping_tumor:
     shell:
         # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
-        $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon bwa mem -M \
+        -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' \
+        -t {threads} \
+        -K {params.K} \
+        -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} \
+        -i {output.sam} \
+        -o {output.bam} \
+        -t {threads} \
+        --sam2bam >> {log.sort} 2>&1
         """
 
 
@@ -139,7 +145,17 @@ rule metrics_tumor:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo MeanQualityByCycle {output.mqm} --algo QualDistribution {output.qdm} --algo GCBias --summary {output.gcs} {output.gcm} --algo AlignmentStat --adapter_seq '' {output.aln} --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver \
+        -r {input.fasta} \
+        -t {threads} \
+        -i {input.bam} \
+        --algo MeanQualityByCycle {output.mqm} \
+        --algo QualDistribution {output.qdm} \
+        --algo GCBias \
+        --summary {output.gcs} {output.gcm} \
+        --algo AlignmentStat \
+        --adapter_seq '' {output.aln} \
+        --algo InsertSizeMetricAlgo {output.ism} >> {log} 2>&1
         $SENTIEON_INSTALL/bin/sentieon plot GCBias -o {output.gcp} {output.gcm}
         $SENTIEON_INSTALL/bin/sentieon plot QualDistribution -o {output.qdp} {output.qdm}
         $SENTIEON_INSTALL/bin/sentieon plot MeanQualityByCycle -o {output.mqp} {output.mqm}
@@ -162,9 +178,23 @@ rule markdup_tumor:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver \
+        -t {threads} \
+        -i {input.bam} \
+        --algo LocusCollector \
+        --fun score_info {output.ns} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver \
+        -t {threads} \
+        -i {input.bam} \
+        --algo Dedup \
+        --rmdup \
+        --score_info {output.ns} \
+        --metrics {output.dm} {output.bam} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver \
+        -r {input.fasta} \
+        -t {threads} \
+        -i {output.bam} \
+        --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
 
@@ -184,9 +214,26 @@ rule baserecal_tumor:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} -t {threads} -i {input.bam} -q {output.rdt} --algo QualCal -k {dbsnp} -k {known_Mills_indels} -k {known_1000G_indels} {output.post} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} --algo QualCal --plot --before {output.rdt} --after {output.post} {output.recal} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} \
+        -t {threads} \
+        -i {input.bam} \
+        --algo QualCal \
+        -k {dbsnp} \
+        -k {known_Mills_indels} \
+        -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} \
+        -t {threads} \
+        -i {input.bam} \
+        -q {output.rdt} \
+        --algo QualCal \
+        -k {dbsnp} \
+        -k {known_Mills_indels} \
+        -k {known_1000G_indels} {output.post} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -t {threads} \
+        --algo QualCal \
+        --plot \
+        --before {output.rdt} \
+        --after {output.post} {output.recal} >> {log} 2>&1
         $SENTIEON_INSTALL/bin/sentieon plot QualCal -o {output.rp} {output.recal}
         """
 
@@ -208,7 +255,12 @@ rule variant_calling:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -q {input.tumor_rdt} --algo TNscope --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} \
+        -t {threads} \
+        -i {input.tumor_bam} \
+        -q {input.tumor_rdt} \
+        --algo TNscope \
+        --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
         #$SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
 
