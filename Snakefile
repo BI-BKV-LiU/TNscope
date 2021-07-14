@@ -122,7 +122,7 @@ rule multiqc:
         multiqc \
         -f \
         --outdir {params} \
-        . >> {log} 2>&1
+        {params} >> {log} 2>&1
         """
 
 rule mapping_tumor:
