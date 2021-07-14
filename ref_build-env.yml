@@ -1,0 +1,8 @@
+name: ref_build
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - awscli
+  - bwa
