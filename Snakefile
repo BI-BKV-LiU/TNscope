@@ -77,6 +77,10 @@ for sample in SAMPLES:
 rule all:
     input:
         expand(BAMS + "{sample}.tumor_sorted.bam", sample=SAMPLES),
+        expand(LOGS + '{sample}.tumor_metrics.log', sample=SAMPLES),
+        expand(BAMS + '{sample}.tumor_deduped.bam', sample=SAMPLES),
+        expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
+        expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
 
 
