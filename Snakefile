@@ -114,7 +114,7 @@ rule multiqc:
     output:
         config['workdir'] + '/{sample}/' + 'multiqc_report.html'
     log:
-        config['workdir'] + '/{sample}/' + 'logs/multiqc.log'
+        config['workdir'] + '/{sample}/' + 'logs/{sample}.multiqc.log'
     params:
         config['workdir'] + '/{sample}/'
     shell:
