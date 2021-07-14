@@ -83,7 +83,7 @@ rule all:
         expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES)
-
+       
 
 rule fastqc:
     input:
@@ -206,9 +206,12 @@ rule markdup_tumor:
         ns = MARKDUP + '{sample}.tumor_score.txt',
         dm = MARKDUP + '{sample}.tumor_dedup_metrics.txt',
         bam = BAMS + '{sample}.tumor_deduped.bam',
-        cm = MARKDUP + '{sample}.tumor_coverage_metrics'
+        cm = METRICS + 'cov/{sample}'
     log:
         LOGS + '{sample}.tumor_dedup.log'
+    params:
+        targets = config["targets"],
+        off_targets = config["off_targets"]
     threads:
         cpus # set the maximum number of available cores
     shell:
@@ -228,6 +231,8 @@ rule markdup_tumor:
         $SENTIEON_INSTALL/bin/sentieon driver \
         -r {input.fasta} \
         -t {threads} \
+        --interval {params.targets} \
+        --interval {params.off_targets} \
         -i {output.bam} \
         --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
