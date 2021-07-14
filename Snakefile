@@ -60,35 +60,49 @@ METRICS = RESULTS + 'metrics/'
 PLOTS = RESULTS + 'plots/'
 MARKDUP = RESULTS + 'markdup/'
 RECAL = RESULTS + 'baserecal/'
+FASTQC = RESULTS + 'fastqc/'
 
 fasta = config['fasta']
 dbsnp = config['dbsnp']
 known_Mills_indels = config['known_Mills_indels']
 known_1000G_indels = config['known_1000G_indels']
 
-
 t = {}
 
 for sample in SAMPLES:
     id_maker(config['tumor'], '/', sample, R1SUFFIX, t)
 
-print(t)
-
 
 # Rules -----------------------------------------------------------------------
 rule all:
     input:
-        #normal_bam = expand(BAMS + "{sample}.normal_sorted.bam", sample=SAMPLES),
-        tumor_bam = expand(BAMS + "{sample}.tumor_sorted.bam", sample=SAMPLES),
-        #normal_ml = expand(LOGS + '{sample}.normal_metrics.log', sample=SAMPLES),
-        tumor_ml = expand(LOGS + '{sample}.tumor_metrics.log', sample=SAMPLES),
-        #normal_deduped = expand(BAMS + '{sample}.normal_deduped.bam', sample=SAMPLES),
-        tumor_deduped = expand(BAMS + '{sample}.tumor_deduped.bam', sample=SAMPLES),
-        #normal_rdt = expand(RECAL + '{sample}.normal_recal_data.table', sample=SAMPLES),
-        tumor_rdt = expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
-        vcf = expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES)
+        expand(BAMS + "{sample}.tumor_sorted.bam", sample=SAMPLES),
+        expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
 
 
+
+rule fastqc:
+    input:
+        R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
+        R2 = config['tumor'] + "/{sample}" + R2SUFFIX
+    output:
+        FASTQC + '{sample}_R1_001_fastqc.zip',
+        FASTQC + '{sample}_R2_001_fastqc.zip',
+        FASTQC + '{sample}_R1_001_fastqc.html',
+        FASTQC + '{sample}_R2_001_fastqc.html'
+    log:
+        LOGS + '{sample}.fastqc.log'
+    params:
+        outdir = FASTQC
+    threads:
+        cpus
+    shell:
+        """
+        fastqc {input.R1} {input.R2} \
+        --format fastq \
+        --threads {threads} \
+        --outdir {params.outdir} >> {log} 2>&1
+        """
 rule mapping_tumor:
     input:
         R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
@@ -109,7 +123,6 @@ rule mapping_tumor:
     threads:
         cpus # set the maximum number of available cores
     shell:
-        # $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
         """
         $SENTIEON_INSTALL/bin/sentieon bwa mem -M \
         -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' \
@@ -262,19 +275,3 @@ rule variant_calling:
         --algo TNscope \
         --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
-        #$SENTIEON_INSTALL/bin/sentieon driver -r {fasta} -t {threads} -i {input.tumor_bam} -i {input.normal_bam} -q {input.tumor_rdt} -q {input.normal_rdt} --algo TNscope --tumor_sample {params.tumor_sample} --normal_sample {params.normal_sample} --dbsnp {dbsnp} {output.vcf} >> {log} 2>&1
-
-
-#############################
-# Not properly working code #
-#############################
-
-# Prints SAM in standard output and @RG is not properly written in sorted BAM
-#'( sentieon bwa mem -M -R "{params.R}" '
-#'-t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} || echo -n "error" ) | '
-#'sentieon util sort -o {output.bam} -t {threads} --sam2bam -i - >> {log} 2>&1'
-
-# Prints SAM into log file and @RG is still not properly written in sorted BAM
-#( sentieon bwa mem -M -R '{params.R}' -t {threads} -K {params.K} -o {output.sam} {input.fasta} {input.R1} {input.R2} || echo -n "error" ) >> {log} 2>&1 | sentieon util sort -o {output.bam} -t {threads} --sam2bam -i - >> {log} 2>&1
-
-# Modified by Massimiliano Volpe on 12/05/2021 to test the tumor-only pipeline.
