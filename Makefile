@@ -8,4 +8,4 @@ CPUS = 80
 
 all:
 	@($(CONDA_ACTIVATE) ; \
-	snakemake --cores $(CPUS) --config cpus=$(CPUS))
+	snakemake --cores $(CPUS) --config cpus=$(CPUS) $(ARGS))
