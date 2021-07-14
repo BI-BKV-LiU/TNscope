@@ -82,7 +82,7 @@ rule all:
         expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
         expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
-
+        expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES)
 
 
 rule fastqc:
@@ -107,6 +107,24 @@ rule fastqc:
         --threads {threads} \
         --outdir {params.outdir} >> {log} 2>&1
         """
+
+rule multiqc:
+    input:
+        FASTQC + '{sample}_R1_001_fastqc.zip'
+    output:
+        config['workdir'] + '/{sample}/' + 'multiqc_report.html'
+    log:
+        config['workdir'] + '/{sample}/' + 'logs/multiqc.log'
+    params:
+        config['workdir'] + '/{sample}/'
+    shell:
+        """
+        multiqc \
+        -f \
+        --outdir {params} \
+        . >> {log} 2>&1
+        """
+
 rule mapping_tumor:
     input:
         R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
