@@ -2,9 +2,9 @@
 ## TNscope Pipeline
 ## Somatic variant calling with Sentieon TNscope (from fastq files to vcf)
 ##
-## Authors: Massimiliano Volpe, Jyotirmoy Das
-## Email: massimiliano.volpe@liu.se, jyotirmoy.das@liu.se
-## Date: 28/01/2021
+## Authors: Massimiliano Volpe, Jyotirmoy Das, Lauri Mesilaakso (Adjustments in "ro-implementation"-branch)
+## Email: massimiliano.volpe@liu.se, jyotirmoy.das@liu.se, lauri.mesilaakso@regionostergotland.se
+## Date: 14/07/2021
 ## Developed on behalf of the Bioinformatics Core Facility, Linköping University
 ##
 ## Rules:
