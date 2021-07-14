@@ -1,12 +1,11 @@
-fastqs/*
+*
+!.gitignore
+!config.yml
 !fastqs/README.md
-
-references/*
 !references/README.md
-
-.snakemake
-
-# Results
-PVAL_66_S3
-# Logs
-logs
+!references/NexteraPE-PE.fa
+!Makefile
+!LICENSE
+!README.md
+!ref_build-env.yml
+!Snakefile
