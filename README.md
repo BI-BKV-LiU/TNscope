@@ -3,7 +3,7 @@ Sentieon TNscope basic pipeline
 
 __Authors:__ Massimiliano Volpe, Jyotirmoy Das, Lauri Mesilaakso (Adjustments in "ro-implementation"-branch)\
 __Email:__ _massimiliano.volpe@liu.se_, _jyotirmoy.das@liu.se_, _lauri.mesilaakso@regionostergotland.se_\
-__Date:__ 28/01/2021
+__Date:__ 14/07/2021
 
 __Developed on behalf of the Bioinformatics Core Facility, Linköping University__
 
