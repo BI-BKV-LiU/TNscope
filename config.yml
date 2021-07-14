@@ -1,6 +1,6 @@
 #normal: "/home/massi/Documents/Sentieon_scripts/TNscope/Blood_NGS"
 tumor: "/home/rada/Documents/TNscope/fastqs"
-fasta: "/home/rada/Documents/TNscope/references/AWS/GRCh37/genome.fa"
+fasta: "/home/rada/Documents/TNscope/references/AWS/UCSC_hg19/genome.fa"
 dbsnp: "/home/rada/Documents/TNscope/references/dbsnp_138.hg19.vcf"
 known_Mills_indels: "/home/rada/Documents/TNscope/references/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf"
 known_1000G_indels: "/home/rada/Documents/TNscope/references/1000G_phase1.indels.hg19.sites.vcf"
