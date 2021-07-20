@@ -237,6 +237,54 @@ rule markdup_tumor:
         --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
+rule bed2IntervalList:
+    input:
+        baits = config["baits"],
+        targets = config["targets"]
+    output:
+        baits_IL = '/home/rada/Documents/TNscope/references/ILS/bait.interval_list',
+        target_IL = '/home/rada/Documents/TNscope/references/ILS/target.interval_list'
+    log:
+        'logs/interval_list.log'
+    params:
+        ref_dict = config["fasta"]
+    threads:
+        cpus
+    shell:
+        """
+        gatk BedToIntervalList \
+        I={input.baits} \
+        O={output.baits_IL} \
+        SD={params.ref_dict}
+        
+        gatk BedToIntervalList \
+        I={input.targets} \
+        O={output.target_IL} \
+        SD={params.ref_dict}
+        """
+
+rule collectHsMetrics:
+    input:
+        bam = rules.markdup_tumor.output.bam,
+        baits_IL = rules.bed2IntervalList.output.baits_IL,
+        target_IL = rules.bed2IntervalList.output.target_IL
+    output:
+        hs_metrics = METRICS + '{sample}_hs_metrics.txt'
+    log:
+        LOGS + 'collectHsMetrics.log'
+    params:
+        ref = config["fasta"]
+    threads:
+        cpus
+    shell:
+        """
+        gatk CollectHsMetrics \
+        I={input.bam} \
+        O={output.hs_metrics} \
+        R={params.ref} \
+        BAIT_INTERVALS={input.baits_IL} \
+        TARGET_INTERVALS={input.target_IL}
+        """   
 
 rule baserecal_tumor:
     input:
