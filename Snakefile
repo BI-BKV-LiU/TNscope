@@ -61,6 +61,7 @@ PLOTS = RESULTS + 'plots/'
 MARKDUP = RESULTS + 'markdup/'
 RECAL = RESULTS + 'baserecal/'
 FASTQC = RESULTS + 'fastqc/'
+ILS = RESULTS + 'intervalLists/'
 
 fasta = config['fasta']
 dbsnp = config['dbsnp']
@@ -82,7 +83,8 @@ rule all:
         expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
         expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
-        expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES)
+        expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
+        expand(METRICS + '{sample}_hs_metrics.txt', sample=SAMPLES)
        
 
 rule fastqc:
