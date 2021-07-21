@@ -10,3 +10,9 @@
 !ref_build-env.yml
 !Snakefile
 .Rproj.user
+
+!exp
+!exp/create_barplot
+!exp/create_barplot/env.yml
+!exp/create_barplot/renv.lock
+!exp/create_barplot/create_barplot.R
