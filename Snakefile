@@ -212,8 +212,8 @@ rule markdup_tumor:
     log:
         LOGS + '{sample}.tumor_dedup.log'
     params:
-        targets = config["targets"],
-        off_targets = config["off_targets"]
+        targets = config["targets"]
+        #off_targets = config["off_targets"]
     threads:
         cpus # set the maximum number of available cores
     shell:
@@ -234,7 +234,6 @@ rule markdup_tumor:
         -r {input.fasta} \
         -t {threads} \
         --interval {params.targets} \
-        --interval {params.off_targets} \
         -i {output.bam} \
         --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
