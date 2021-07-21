@@ -16,3 +16,4 @@
 !exp/create_barplot/env.yml
 !exp/create_barplot/renv.lock
 !exp/create_barplot/create_barplot.R
+!exp/create_barplot/README.md
