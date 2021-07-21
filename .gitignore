@@ -18,3 +18,7 @@
 !exp/create_barplot/create_barplot.R
 !exp/create_barplot/README.md
 !exp/create_barplot/in_72.tsv
+
+!exp/gather_Hs_metrics
+!exp/gather_Hs_metrics/hsmetrix_all_samples.tsv
+!exp/gather_Hs_metrics/join_tables.sh
