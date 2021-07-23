@@ -16,7 +16,7 @@ GATHERED_DIR = /home/rada/Documents/TNscope/exp/gather_Hs_metrics/deduped_hs_met
 #METRICS_FP=$(wildcard $(RESULTS_DIR)/*_hs_metrics.txt)
 METRICS_FP = $(shell find $(RESULTS_DIR) -type d \( -path $(EXCLUDE_DIR1) -o -path $(EXCLUDE_DIR2) \) -prune -false -o -type f -name '*_hs_metrics.txt')
 METRICS = $(notdir $(METRICS_FP))
-JOINED = hsmetrix_all_samples.tsv
+JOINED = hsmetrics_all_samples.tsv
 
 JOIN_SCRIPT = /home/rada/Documents/TNscope/exp/gather_Hs_metrics/join_tables.sh
 

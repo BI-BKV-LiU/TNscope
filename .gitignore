@@ -20,5 +20,5 @@
 !exp/create_barplot/in_72.tsv
 
 !exp/gather_Hs_metrics
-!exp/gather_Hs_metrics/UCSC_as_target_hsmetrics_all_samples.tsv
+!exp/gather_Hs_metrics/hsmetrics_all_samples.tsv
 !exp/gather_Hs_metrics/join_tables.sh
