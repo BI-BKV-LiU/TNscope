@@ -6,26 +6,27 @@
 set -e
 set -uo pipefail
 
+RESULTS_DIR=$1
+JOINED_TBL=$2
+
 CWD=$(pwd)
 
 # Clear log file for the total run
 rm -f logs.log
 
-# Grab tsv header from one file
-HEADER=$(echo -e "SAMPLE\t")$(awk '/^BAIT_SET.+/{print $0}' deduped_hs_metrix/PVAL_65_S1.txt)
+# Grab tsv header from the first listed file in the RESULTS_DIR
+HEADER=$(echo -e "SAMPLE\t")$(awk '/^BAIT_SET.+/{print $0}' "$RESULTS_DIR"/$(ls "$RESULTS_DIR" | head -n1))
 
+rm -f $JOINED_TBL
 
-OUTF="hsmetrix_all_samples.tsv"
-rm -f $OUTF
-
-input=$( find deduped_hs_metrix -name "*.txt" -and -type f -print0 | xargs -0 echo )
+input=$( find $RESULTS_DIR -name "*.txt" -and -type f -print0 | xargs -0 echo )
 read -r -a input_files_array <<< $input
 # Loop through all the samples
 for i in "${!input_files_array[@]}"; do
-  FULL_FILE_PATH="$CWD"/$(echo ${input_files_array[$i]})
+  FULL_FILE_PATH=$(echo ${input_files_array[$i]})
   STEM=$(basename -s '.txt' $(echo $FULL_FILE_PATH))
   # Insert header on the first row of the file
-  echo "$HEADER" >> "$OUTF"
+  echo "$HEADER" >> "$JOINED_TBL"
   HEADER=''
   
   start_time=$(date +"%c")
@@ -35,7 +36,7 @@ for i in "${!input_files_array[@]}"; do
   # Grab the HsMetrix data
   DATA=$(sed -n '8p' "$FULL_FILE_PATH")
   # Append it to the data file
-  printf "$STEM\t$DATA\n" >> "$OUTF"
+  printf "$STEM\t$DATA\n" >> "$JOINED_TBL"
   end=$(date +%s)
   runtime=$((end-start))
   echo "The run took: $runtime s for $STEM" >> logs.log
@@ -45,4 +46,4 @@ for i in "${!input_files_array[@]}"; do
 done
 
 # Remove blank lines from the final output file
-sed -i '/^$/d' "$OUTF"
+sed -i '/^$/d' "$JOINED_TBL"
