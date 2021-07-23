@@ -84,6 +84,7 @@ rule all:
         expand(RESULTS + '{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
+        # expand(LOGS + '{sample}.DeOCov.log', sample=SAMPLES),
         expand(METRICS + '{sample}_hs_metrics.txt', sample=SAMPLES)
        
 
@@ -241,9 +242,11 @@ rule markdup_tumor:
 rule bed2IntervalList:
     input:
         baits = config["baits"],
+        # targets = config["UCSC"]
         targets = config["targets"]
     output:
         baits_IL = '/home/rada/Documents/TNscope/references/ILS/bait.interval_list',
+        # target_IL = '/home/rada/Documents/TNscope/references/ILS/UCSC.interval_list'
         target_IL = '/home/rada/Documents/TNscope/references/ILS/target.interval_list'
     log:
         'logs/interval_list.log'
@@ -351,3 +354,27 @@ rule variant_calling:
         --algo TNscope \
         --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
+
+# rule DepthOfCoverage:
+#     input:
+#         bam = rules.markdup_tumor.output.bam,
+#         target_IL = rules.bed2IntervalList.output.target_IL
+#     output:
+#         doc = METRICS + 'DeOCov/{sample}'
+#     log:
+#         LOGS + '{sample}.DeOCov.log'
+#     params:
+#         ref = config["fasta"],
+#         geneList = config["genes_of_interest"]
+#     threads:
+#         cpus
+#     shell:
+#         """
+#         gatk \
+#         DepthOfCoverage \
+#         -R {params.ref} \
+#         -O {output.doc} \
+#         -I {input.bam} \
+#         -gene-list {params.geneList} \
+#         --intervals {input.target_IL}
+#         """ 
