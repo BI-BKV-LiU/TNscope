@@ -17,3 +17,14 @@ CPUS = 90
 all:
 	@($(CONDA_ACTIVATE) ; \
 	snakemake --cores $(CPUS) --config cpus=$(CPUS) $(ARGS))
+
+# On why LC_ALL=C and the following command are run: 
+# https://www.biostars.org/p/177653/#177764
+# https://bedtools.readthedocs.io/en/latest/content/tools/merge.html
+merge_targets:
+	$(CONDA_ACTIVATE) ; \
+	cd references/ROstergotland_Onco_v2_TE-94002956_hg19/temp ; \
+	LC_ALL=C ; \
+	sort -t$$'\t' -k1,1 -k2,2n UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed
+	bedtools merge -i UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.merged.bed
+
