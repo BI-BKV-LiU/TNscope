@@ -28,3 +28,6 @@ merge_targets:
 	sort -t$$'\t' -k1,1 -k2,2n UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed
 	bedtools merge -i UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.merged.bed
 
+multiqc:
+	$(CONDA_ACTIVATE) ; \
+	multiqc . --ignore temp/* --ignore fastq-temp --ignore exp/* --ignore .snakemake/*
