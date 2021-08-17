@@ -30,4 +30,4 @@ merge_targets:
 
 multiqc:
 	$(CONDA_ACTIVATE) ; \
-	multiqc . --ignore temp/* --ignore fastq-temp --ignore exp/* --ignore .snakemake/*
+	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake
