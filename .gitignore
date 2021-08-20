@@ -37,4 +37,6 @@
 !exp/create_coverage_plots/env.yml
 !exp/create_coverage_plots/create_coverages.ipynb
 !exp/create_coverage_plots/ids.tsv
+!exp/create_coverage_plots/twist_design_bed.geneTrack.tsv
+!exp/create_coverage_plots/gene_names.tsv
 !exp/create_coverage_plots/find_names.sh
