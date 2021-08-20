@@ -13,6 +13,8 @@ workdir: "/home/rada/Documents/TNscope"
 platform: "ILLUMINA"
 R1_suffix: "_R1_001.fastq.gz"
 R2_suffix: "_R2_001.fastq.gz"
+exons_of_interest: "exon_cov_analysis/exons_of_interest.bed"
+exon_names: "exon_cov_analysis/exon_names.tsv"
 params:
         sentieon_install: "/home/rada/Documents/sentieon-genomics-202010.02"
         sentieon_license: "/home/rada/Documents/Sentieon/licence/GMC_SOR_usb127.lic"
