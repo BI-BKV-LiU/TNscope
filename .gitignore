@@ -40,3 +40,5 @@
 !exp/create_coverage_plots/twist_design_bed.geneTrack.tsv
 !exp/create_coverage_plots/gene_names.tsv
 !exp/create_coverage_plots/find_names.sh
+!exon_cov_analysis
+!exon_cov_analysis/*
