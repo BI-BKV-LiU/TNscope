@@ -337,7 +337,7 @@ rule variant_calling:
         tumor_rdt = rules.baserecal_tumor.output.rdt,
         #normal_rdt = rules.baserecal_normal.output.rdt
     output:
-        vcf = RESULTS + '{sample}.tnscope.vcf.gz',
+        vcf = RESULTS + 'variant_calling/{sample}.tnscope.vcf.gz',
     params:
         tumor_sample = '{sample}_tumor',
         #normal_sample = '{sample}_normal'
