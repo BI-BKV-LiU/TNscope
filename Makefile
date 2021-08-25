@@ -10,6 +10,12 @@ CURRENT_CONDA_ENV_NAME = TNscope
 # Note that the extra "conda activate" is needed to ensure that the activate floats env to the front of PATH
 CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate $(CURRENT_CONDA_ENV_NAME)
 
+# Sample name for transcript exon coverage barplots
+IN_FILE = exp/create_barplot/cov/results_PVAL_65_S1.tsv
+NCBI_NAME = NM_000110.4
+COMMON_NAME = DPYD
+SAMPLE_NAME = PVAL_65_S1
+
 CPUS = 90
 
 .PHONY: all, merge_targets, multiqc
@@ -31,3 +37,7 @@ merge_targets:
 multiqc:
 	$(CONDA_ACTIVATE) ; \
 	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake
+
+exon_covs:
+	$(CONDA_ACTIVATE) ; \
+	./exp/create_barplot/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME)
