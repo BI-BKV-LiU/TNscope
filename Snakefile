@@ -355,26 +355,156 @@ rule variant_calling:
         --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
 
-# rule DepthOfCoverage:
-#     input:
-#         bam = rules.markdup_tumor.output.bam,
-#         target_IL = rules.bed2IntervalList.output.target_IL
-#     output:
-#         doc = METRICS + 'DeOCov/{sample}'
-#     log:
-#         LOGS + '{sample}.DeOCov.log'
-#     params:
-#         ref = config["fasta"],
-#         geneList = config["genes_of_interest"]
-#     threads:
-#         cpus
-#     shell:
-#         """
-#         gatk \
-#         DepthOfCoverage \
-#         -R {params.ref} \
-#         -O {output.doc} \
-#         -I {input.bam} \
-#         -gene-list {params.geneList} \
-#         --intervals {input.target_IL}
-#         """ 
+rule exon_coverages:
+    input:
+        eoi = config['exons_of_interest'],
+        tumor_bam = rules.markdup_tumor.output.bam
+    output:
+        exon_covs = RESULTS + 'exon_cov/{sample}.exon_cov.tsv'
+    log:
+        LOGS + '{sample}.exon_cov.log'
+    shell:
+        """
+        SAMPLE=$(basename -s .tumor_deduped.bam {input.tumor_bam})
+        bedtools coverage -hist \
+        -a {input.eoi} \
+        -b {input.tumor_bam} > {output}/"$SAMPLE".exon_cov.tsv
+        """
+
+rule summarise_exon_coverages:
+    input:
+        # exon_cov = RESULTS + 'exon_cov/{sample}.exon_cov.tsv',
+        exon_cov = rules.exon_coverages.output.exon_covs,
+        eoi = config['exon_names']
+    params:
+        bar_plot = config['workdir'] + '/bar_plot_all_samples.html',
+        metrics_tables = config['workdir'] + '/all_cov_metrics.csv'
+    log:       
+        LOGS + '{sample}.summarise_exon_covs.rdy.log'
+    run:
+        import plotly
+        import pandas as pd
+        from pathlib import Path
+        import plotly.express as px
+        import plotly.io as io
+        import os
+
+        #sample_covs = Path('cov/')
+        DOUBLE_MATCH = glob_wildcards("/home/rada/Documents/TNscope/{sample1}/exon_cov/{sample2}.exon_cov.tsv")
+        SAMPLES = expand("/home/rada/Documents/TNscope/{sample1}/exon_cov/{sample2}.exon_cov.tsv", zip, **DOUBLE_MATCH._asdict())
+        
+        gene_names = pd.read_csv(input.eoi, 
+                                sep="\t", 
+                                names=["name", "symbol"],
+                                header=0
+                                )
+
+        fig_list = []
+        metrics_df_list = []
+        out_path = "sample_coverages/"
+        #print(type(input.exon_cov))
+
+        #for path in sorted(sample_covs.glob("*.hist")):
+        for path in SAMPLES:
+            path = Path(path)
+            sample_name = str(path.stem).split(".")[0]
+            df = pd.read_csv(path, 
+                            sep="\t", 
+                            names=["chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"])
+            df = df[df.chrom != "all"].copy()
+            df[['ID', 'rest']] = df['name'].str.split('_cds_', -1, expand=True) # https://stackoverflow.com/a/39358924
+            df[["exon_number", "unknown", "exon_chrom", "exon_start_pos", "exon_strand"]] = df['rest'].str.split('_', -1, expand=True)
+            df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
+            df = df.drop(["name","rest"], axis = 1)
+            df = df.astype({
+                    'chrom':'str',
+                    'start':'int',
+                    'end':'int',
+                    'score':'float',
+                    'strand':'str',
+                    'depth':'int',
+                    'num_bases_at_depth':'int',
+                    'size_of_feature':'int',
+                    'pros_of_feature_at_depth':'float',
+                    'ID':'category',
+                    "exon_number":'category', 
+                    "unknown":'category', 
+                    "exon_chrom":"category", 
+                    "exon_start_pos":"int", 
+                    "exon_strand":"category"
+                    }
+                    )
+            df = df.merge(right=gene_names,
+                        how='left',
+                        left_on='base_ID',
+                        right_on='name'
+                        )
+            df['symbol_ID'] = df['symbol'] + " " + df['ID'].astype(str)
+            df = df.sort_values(by=['symbol_ID'])
+            df = df.loc[df.index.repeat(df.num_bases_at_depth)] # https://stackoverflow.com/a/57009491
+            
+            # Extract a list of all unique NCBI ID:s
+            transcripts = df['symbol_ID'].unique()
+            
+            grouped = df.groupby(df.symbol_ID)
+
+            transcripts_list = []
+            
+            for i in transcripts:
+                c = grouped.get_group(i)
+                # Scrape NCBI transcript ID
+                NCBI_id = c.iloc[0]['symbol_ID']
+                # Duplicate rows with several bases 
+                c = c.loc[c.index.repeat(c.num_bases_at_depth)] # https://stackoverflow.com/a/57009491
+                # Extract key values for the depth column
+                c = c.describe()['depth'].to_frame(NCBI_id).T
+                transcripts_list.append(c)
+
+            # Join all key data into one df
+            all_transcripts = (pd.concat(transcripts_list, axis=0)
+                            .rename(columns={'count': 'total_length_of_exons'})
+                            .astype({
+                                    'total_length_of_exons':'int',
+                                    'max':'int',
+                                    'min':'int'}
+                                    )                  
+                            )
+            
+            all_transcripts.index.name = "ID"
+            # Create bar plots
+            bar_fig = px.bar(all_transcripts.reset_index(), 
+                            x='ID', 
+                            y='mean', 
+                            hover_data=["total_length_of_exons", "mean", 'std', 'min', '25%', '50%', '75%', 'max',"ID"],
+                            title="Sample name: " + sample_name
+                            )
+            #bar_fig.write_html(out_path + "bar/" + sample_name + "_bar" + ".html", 
+            #                   config= {'displaylogo': False})
+            
+            fig_list.append(bar_fig)
+            
+            # Create tables with metrics
+            all_transcripts['sample_name'] = sample_name
+            metrics_df_list.append(all_transcripts)
+
+
+        all_metrics = pd.concat(metrics_df_list, axis=0, ignore_index=True)
+        all_metrics.index.name = "ID"
+        out_path = Path(out_path + "metrics/all_metrics.csv")
+        all_metrics.to_csv(params.metrics_tables)
+
+
+        print("Printed")
+
+        all_bar_plots = params.bar_plot
+        # # Remove the previous version of html file, very inelegant but works...
+        if os.path.exists(all_bar_plots):
+            os.remove(all_bar_plots)
+
+        # https://stackoverflow.com/a/59869358
+        # Write all bar plots into one html page
+        with open(all_bar_plots, 'a') as f:
+            for fig in fig_list:
+                f.write(fig.to_html(full_html=False, 
+                                    include_plotlyjs='cdn', 
+                                    config= {'displaylogo': False}))
