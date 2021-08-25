@@ -18,6 +18,7 @@
 ##      /path_to_normal/256_S1_R2_001.fastq.gz --> "_R2_001.fastq.gz"
 ################################################################################
 
+import subprocess
 
 # Functions -------------------------------------------------------------------
 def id_maker(path, sep, sample, suffix, d):
@@ -44,7 +45,7 @@ cpus = int(config['cpus'])
 # Update with the location of the Sentieon software package and license file
 shell.prefix(f"export SENTIEON_INSTALL={config['params']['sentieon_install']}; export SENTIEON_LICENSE={config['params']['sentieon_license']}; export SENTIEON_TMPDIR={config['params']['tmp_dir']};")
 
-import subprocess
+
 
 subprocess.run(config['params']['sentieon_install'] + "/bin/sentieon licsrvr --start --log logs/logs.txt " + config['params']['sentieon_license'], shell=True)
 
