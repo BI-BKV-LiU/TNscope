@@ -20,6 +20,7 @@
 !exp/create_barplot/in_72.tsv
 !exp/create_barplot/PVAL_65_S1_summary.tsv
 !exp/create_barplot/PVAL_65_S1.tsv
+!exp/create_barplot/create_barps.Rmd
 
 !exp/gather_Hs_metrics
 !exp/gather_Hs_metrics/hsmetrics_all_samples.tsv

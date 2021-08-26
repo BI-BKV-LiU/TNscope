@@ -1,0 +1,197 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(magrittr)
+library(ggplot2)
+library(stringr)
+library(patchwork)
+```
+
+
+```{r}
+read_cov_file <- function(path2file) {
+  read_tsv(path2file, 
+           col_names = c("chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_A_at_depth"))
+}
+
+extract_summary <- function(df) {
+  chrom_list <- df %>% 
+    group_by(chrom) %>% 
+    group_split()
+
+  chrom_list[[1]] %>% 
+    select(c(1:5)) %>% 
+    rename(name = chrom, depth = start, num_bases_at_depth = end, size_of_feature = name, pros_of_A_at_depth = score)
+}
+
+plot_bar <- function(df,title) {
+  plot_title <- paste(title, "number of bases with total depth")
+  ggplot(data=df, aes(x=depth, y=num_bases_at_depth)) +
+  # ggplot(data=df, aes(x=sum_of_num_bases_at_depth, y=depth)) +
+  geom_bar(stat="identity") + 
+    ggtitle(plot_title) +
+    xlab("Number of bases") + 
+    ylab("Depth")
+}
+
+for (file in list.files(path = "cov", full.names = TRUE)){
+  print(file)
+  sample_name <- str_split(file, "_")
+  sample_name <- paste(sample_name[[1]][[2]], sample_name[[1]][[3]], sample_name[[1]][[4]], sep = "_")
+  p <- read_cov_file(file) %>% 
+    extract_summary() %>% 
+    plot_bar(sample_name)
+    ggsave(filename = paste(sample_name,".png", sep = ""), plot = p, device = "png")
+}
+
+```
+
+
+```{r}
+input <- read_tsv("cov/results_PVAL_65_S1.hist", 
+                  col_names = c("chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_A_at_depth"))
+
+input %>% 
+  extract_summary() %>% 
+  write_tsv(file = "PVAL_65_S1_summary.tsv")  
+
+input %<>% filter(chrom != "all")  %>% 
+  separate(col = "name",
+           into = c("ID","rest"),
+           sep = "_cds_"
+          ) %>% 
+  separate(col = "rest",
+           into = c("exon_number","unknown","exon_chrom","exon_start_pos","exon_strand"),
+           sep = "_"
+          ) #%>% 
+  #write_tsv(file = "PVAL_65_S1.tsv")
+
+
+exons <- input %>% filter(ID == "NM_000110.4") %>% 
+  select(one_of(c("exon_number","depth","num_bases_at_depth","size_of_feature","pros_of_A_at_depth"))) %>% 
+  group_by(exon_number) %>% 
+  group_split()
+
+
+plot_bar <- function(df, exon_no, length_of_exon) {
+  plot_title <- paste("Exon number:", exon_no, "- length:", length_of_exon)
+  ggplot(data=df, aes(x=depth, y=num_bases_at_depth)) +
+  # ggplot(data=df, aes(x=sum_of_num_bases_at_depth, y=depth)) +
+  geom_bar(stat="identity") + 
+    xlab("Depth") + 
+    ggtitle(plot_title) +
+    ylab("Number of bases")
+}
+
+
+all_plots <- vector(mode = "list", length = 0)
+
+i <- 0
+
+for(df in exons){
+  i <- i + 1
+  #print(df)
+  length_of_exon <- df[1,4][[1]]
+  exon_no <- df[1,1][[1]]
+  p <- df %>% plot_bar(exon_no, length_of_exon)
+  all_plots[[i]] <- p
+}
+
+
+common_name <- "DPYD"
+NCBI_name <- "NM_000110.4"
+gene_name <- paste(common_name, NCBI_name)
+sample_name <- "PVAL_65_S1"
+# Match plots to areas by name
+design <- "ABMRS
+           ÄUVXY
+           CDEZG
+           HIJKL
+           OPQ##"
+
+p <- wrap_plots(A = all_plots[[1]],
+                B = all_plots[[2]],
+                C = all_plots[[3]],
+                D = all_plots[[4]],                
+                E = all_plots[[5]],                
+                Z = all_plots[[6]],
+                G = all_plots[[7]],                
+                H = all_plots[[8]],                
+                I = all_plots[[9]],
+                J = all_plots[[10]],
+                K = all_plots[[11]],                
+                L = all_plots[[12]],
+                M = all_plots[[13]],
+                O = all_plots[[14]],
+                P = all_plots[[15]],
+                Q = all_plots[[16]],
+                R = all_plots[[17]],
+                S = all_plots[[18]],
+                Ä = all_plots[[19]],
+                U = all_plots[[20]],
+                V = all_plots[[21]],
+                X = all_plots[[22]],
+                Y = all_plots[[23]],
+                design = design) + plot_annotation(
+  title = paste0("Gene: ", gene_name, ", sample: ", sample_name)
+)
+
+ggsave(filename = paste0(common_name,"_",NCBI_name,".png"), 
+       plot = p, 
+       device = "png",
+       width = 25,
+       height = 25,
+       units = "in"
+       )
+
+
+```
+
+
+## Create graphs for all genes in all samples
+
+```{r}
+
+for (file in list.files(path = "cov", full.names = TRUE)){
+  sample_name <- str_split(file, "_")
+  sample_name <- paste(sample_name[[1]][[2]], sample_name[[1]][[3]], sample_name[[1]][[4]], sep = "_")
+  sample_name <- str_split(sample_name, "\\.")[[1]][[1]]
+  input <- read_tsv(file = file, 
+                    col_names = c("chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_A_at_depth"))
+
+  input %<>% filter(chrom != "all")  %>% 
+    separate(col = "name",
+             into = c("ID","rest"),
+             sep = "_cds_"
+            ) %>% 
+    separate(col = "rest",
+             into = c("exon_number","unknown","exon_chrom","exon_start_pos","exon_strand"),
+             sep = "_"
+            ) 
+  
+  print(sample_name)
+  all_genes <- input %>% 
+    group_by(ID) %>% 
+    group_split()
+  break
+}
+
+
+
+
+
+```
+
+
+```{r}
+input %>% 
+  write_tsv(file = "PVAL_65_S1.tsv")
+```
+
+
+
