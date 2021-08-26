@@ -42,3 +42,5 @@
 !exp/create_coverage_plots/find_names.sh
 !exon_cov_analysis
 !exon_cov_analysis/*
+# This is too big
+exon_cov_analysis/all_samples.tsv
