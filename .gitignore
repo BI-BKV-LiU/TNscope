@@ -10,7 +10,6 @@
 !ref_build-env.yml
 !Snakefile
 .Rproj.user
-
 !exp
 !exp/create_barplot
 !exp/create_barplot/env.yml
@@ -40,6 +39,7 @@
 !exp/create_coverage_plots/ids.tsv
 !exp/create_coverage_plots/twist_design_bed.geneTrack.tsv
 !exp/create_coverage_plots/gene_names.tsv
+!exp/create_coverage_plots/cat_samples.sh
 !exp/create_coverage_plots/find_names.sh
 !exon_cov_analysis
 !exon_cov_analysis/*
