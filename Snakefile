@@ -399,11 +399,11 @@ rule summarise_exon_coverages:
                                 names=["name", "symbol"],
                                 header=0)
 
-
         header = ["sample_id", "chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"]
         all_samples = pd.read_csv(input.all_samples, 
                                 sep="\t", 
                                 names=header)
+
         # Remove summary 'all' sections from the df
         all_samples = all_samples[all_samples.chrom != "all"].copy()
 
