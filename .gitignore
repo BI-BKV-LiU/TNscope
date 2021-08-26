@@ -44,3 +44,7 @@
 !exon_cov_analysis/*
 # This is too big
 exon_cov_analysis/all_samples.tsv
+
+# Avail bin directory
+!bin
+!bin/*
