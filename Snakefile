@@ -368,12 +368,15 @@ rule exon_coverages:
         exon_covs = RESULTS + 'exon_cov/{sample}.exon_cov.tsv'
     log:
         LOGS + '{sample}.exon_cov.log'
+    params:
+        all_samples = "exon_cov_analysis/all_samples.tsv"
     shell:
         """
         SAMPLE=$(basename -s .tumor_deduped.bam {input.tumor_bam})
         bedtools coverage -hist \
         -a {input.eoi} \
-        -b {input.tumor_bam} > {output}/"$SAMPLE".exon_cov.tsv
+        -b {input.tumor_bam} > {output.exon_covs}
+        sed 's/^/{wildcards.sample}\t/' {output.exon_covs} >> {params.all_samples}
         """
 
 rule summarise_exon_coverages:
