@@ -389,53 +389,46 @@ rule exon_coverages:
 
 rule summarise_exon_coverages:
     input:
-        all_samples = config['workdir'] + "/exon_cov_analysis/all_samples.tsv",
+        samples = expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
         eoi = config['exon_names']
     output:
         bar_plot = config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
-        metrics_tables = config['workdir'] + '/exon_cov_analysis/all_cov_metrics.csv'
+    params:    
+        metrics_tables = config['workdir'] + '/exon_cov_analysis/samples/'
     log:
         config['workdir'] + '/logs/summarise_exon_covs.log'
     run:
         import pandas as pd
-        from pathlib import Path
         import plotly.express as px
         import plotly.io as io
         import os
-
+ 
         gene_names = pd.read_csv(input.eoi, 
                                 sep="\t", 
                                 names=["name", "symbol"],
                                 header=0)
 
-        header = ["sample_id", "chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"]
-        all_samples = pd.read_csv(input.all_samples, 
-                                sep="\t", 
-                                names=header)
-
-        # Remove summary 'all' sections from the df
-        all_samples = all_samples[all_samples.chrom != "all"].copy()
+        header = ["chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"]
 
         fig_list = []
-        metrics_df_list = []
         
-        # Get a list of all samples IDs
-        sample_IDs = all_samples['sample_id'].unique()
+        for f_path in input.samples:
+            sample = pd.read_csv(f_path, 
+                                 sep="\t", 
+                                 names=header)
+            
+            sample_name = get_sample_name(f_path)
 
-        # Group the total df by sample IDs
-        grouped = all_samples.groupby(all_samples.sample_id)
-
-        # Loop through each separate df with own sample
-        for sample in sample_IDs:
-            # Reset the grouped df
-            # Extract current sample's df
-            df = grouped.get_group(sample).copy()
+            # Remove summary 'all' sections from the df since they have only 6 fields and
+            # aren't really useful now otherwise either
+            df = sample[sample.chrom != "all"].copy()
+        
             # Parse and expand the transcript data column
             df[['ID', 'rest']] = df['name'].str.split('_cds_', -1, expand=True) # https://stackoverflow.com/a/39358924
             df[["exon_number", "unknown", "exon_chrom", "exon_start_pos", "exon_strand"]] = df['rest'].str.split('_', -1, expand=True)
             df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
-            sample_name = df.iloc[0][header[0]]
-            df = df.drop(["name","rest"]+[header[0]], axis = 1)
+            #sample_name = df.iloc[0][header[0]]
+            df = df.drop(["name","rest"], axis = 1)
             # Assign correct datatypes to each column
             df = df.astype({
                 'chrom':'str',
@@ -457,64 +450,62 @@ rule summarise_exon_coverages:
                 )
             # Add gene names to the current df
             df = df.merge(right=gene_names,
-                        how='left',
-                        left_on='base_ID',
-                        right_on='name'
-                        )
+                          how='left',
+                          left_on='base_ID',
+                          right_on='name')
+            
             # Join symbols and IDs into one column so they can be visualised as one entity
             df['symbol_ID'] = df['symbol'] + " " + df['ID'].astype(str)
             # Sort the symbol_IDs so they aren't randomly presented in the figure
             df = df.sort_values(by=['symbol_ID'])
+
             # Duplicate rows with several bases, this enables calculating averages in a more easier way
             df = df.loc[df.index.repeat(df.num_bases_at_depth)] # https://stackoverflow.com/a/57009491
             
+            # Create dir for the current sample, into which all the transcript coverage tsv:s end up
+            create_dir_if_not_exist(params.metrics_tables + sample_name)
+
             # Get a list of symbol_IDs so they can be looped through later on
             transcripts = df['symbol_ID'].unique()
-
+            # Split the df into "symbol_ID" subgroups
             grouped_symbol_IDs = df.groupby(df.symbol_ID)
-
+            # This will hold a list of df:s with depth metrics data such as 
             transcripts_list = []
             
-            for i in transcripts:
-                c = grouped_symbol_IDs.get_group(i)
+            for j in transcripts:
+                c = grouped_symbol_IDs.get_group(j)
                 # Scrape NCBI transcript ID
                 NCBI_id = c.iloc[0]['symbol_ID']
-                
-                # Extract key values for the depth column
+                c.index.name = "row_no"
+                c.to_csv(params.metrics_tables + sample_name + "/" + NCBI_id.replace(" ", "_") + "_cov.tsv")
+                # Extract metrics values for the depth column
                 c = c.describe()['depth'].to_frame(NCBI_id).T
                 transcripts_list.append(c)
 
-            # Join all key data into one df
-            all_transcripts = (pd.concat(transcripts_list, axis=0)
-                            .rename(columns={'count': 'total_length_of_exons'})
-                            .astype({
-                                    'total_length_of_exons':'int',
-                                    'max':'int',
-                                    'min':'int'}
-                                    )                  
-                            )
+            # Join all metrics data into one df
+            all_transcripts_metrics = (pd.concat(transcripts_list, axis=0)
+                                       .rename(columns={'count': 'total_length_of_exons'})
+                                       .astype({
+                                             'total_length_of_exons':'int',
+                                             'max':'int',
+                                             'min':'int'}
+                                              ))
             
-            all_transcripts.index.name = "ID"
+            all_transcripts_metrics.index.name = "ID"
             # Create bar plots
-            bar_fig = px.bar(all_transcripts.reset_index(), 
-                            y='mean', 
-                            x='ID', 
-                            hover_data=["total_length_of_exons", "mean", 'std', 'min', '25%', '50%', '75%', 'max',"ID"],
-                            title="Sample name: " + sample_name
-                            )
+            bar_fig = px.bar(all_transcripts_metrics.reset_index(), 
+                             y='mean', 
+                             x='ID', 
+                             hover_data=["total_length_of_exons", "mean", 'std', 'min', '25%', '50%', '75%', 'max',"ID"],
+                             title="Sample name: " + sample_name)
             
             fig_list.append(bar_fig)
-            
-            # Create tables with metrics
-            all_transcripts['sample_name'] = sample_name
-            metrics_df_list.append(all_transcripts)
             del df
 
         # Join all metrics tables into one
-        all_metrics = pd.concat(metrics_df_list, axis=0, ignore_index=True)
+        #all_metrics = pd.concat(metrics_df_list, axis=0, ignore_index=True)
         # Give the index column own name so it looks nice in the csv
-        all_metrics.index.name = "ID"
-        all_metrics.to_csv(output.metrics_tables)
+        #all_metrics.index.name = "ID"
 
         # https://stackoverflow.com/a/59869358
         # Write all bar plots into one html page
