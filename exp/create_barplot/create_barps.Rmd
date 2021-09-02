@@ -39,6 +39,7 @@ plot_bar <- function(df,title) {
     ylab("Depth")
 }
 
+
 for (file in list.files(path = "cov", full.names = TRUE)){
   print(file)
   sample_name <- str_split(file, "_")
@@ -53,7 +54,7 @@ for (file in list.files(path = "cov", full.names = TRUE)){
 
 
 ```{r}
-input <- read_tsv("cov/results_PVAL_65_S1.hist", 
+input <- read_tsv("cov/results_PVAL_65_S1.tsv", 
                   col_names = c("chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_A_at_depth"))
 
 input %>% 

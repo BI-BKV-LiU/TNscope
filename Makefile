@@ -40,4 +40,4 @@ multiqc:
 
 exon_covs:
 	$(CONDA_ACTIVATE) ; \
-	./exp/create_barplot/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME)
+	Rscript bin/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME) $(OUT_DIR)
