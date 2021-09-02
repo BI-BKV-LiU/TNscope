@@ -26,16 +26,7 @@ all:
 	rm -f exon_cov_analysis/bar_plot_all_samples.html ; \
 	snakemake --cores $(CPUS) --config cpus=$(CPUS) $(ARGS))
 
-# On why LC_ALL=C and the following command are run: 
-# https://www.biostars.org/p/177653/#177764
-# https://bedtools.readthedocs.io/en/latest/content/tools/merge.html
-merge_targets:
-	$(CONDA_ACTIVATE) ; \
-	cd references/ROstergotland_Onco_v2_TE-94002956_hg19/temp ; \
-	LC_ALL=C ; \
-	sort -t$$'\t' -k1,1 -k2,2n UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed
-	bedtools merge -i UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.bed > UCSC_combined_ROstergotland_Onco_v2_TE-94002956_hg19.sorted.merged.bed
-
+## multiqc: Create a multiqc report from all the pipeline results
 multiqc:
 	$(CONDA_ACTIVATE) ; \
 	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake
