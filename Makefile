@@ -15,6 +15,7 @@ IN_FILE = exp/create_barplot/cov/results_PVAL_65_S1.tsv
 NCBI_NAME = NM_000110.4
 COMMON_NAME = DPYD
 SAMPLE_NAME = PVAL_65_S1
+OUT_DIR = res/
 
 CPUS = 90
 
