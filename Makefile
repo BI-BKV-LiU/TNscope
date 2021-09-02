@@ -19,7 +19,7 @@ OUT_DIR = res/
 
 CPUS = 90
 
-.PHONY: all, merge_targets, multiqc
+.PHONY: all, report, multiqc, exon_covs, help
 
 all:
 	@($(CONDA_ACTIVATE) ; \
