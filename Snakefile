@@ -31,6 +31,15 @@ def id_maker(path, sep, sample, suffix, d):
     d[sample] = l
     return(d)
 
+def get_sample_name(f_path):
+    '''Extract samplename from string: /home/rada/Documents/TNscope/PVAL_65_S1/exon_cov/PVAL_65_S1.exon_cov.tsv'''
+    return str(Path(f_path).stem).split(".")[0]
+
+def create_dir_if_not_exist(dir_name):
+    '''Create a directory based on input string'''
+    if not Path(dir_name).is_dir():
+        Path(dir_name).mkdir(parents=True, exist_ok=True)
+
 
 # Globals ---------------------------------------------------------------------
 
