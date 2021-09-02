@@ -19,6 +19,7 @@
 ################################################################################
 
 import subprocess
+from pathlib import Path
 
 # Functions -------------------------------------------------------------------
 def id_maker(path, sep, sample, suffix, d):
