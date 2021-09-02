@@ -39,6 +39,11 @@ multiqc:
 	$(CONDA_ACTIVATE) ; \
 	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake
 
+report:
+	$(CONDA_ACTIVATE) ; \
+	snakemake --report report.html
+
+## exon_covs: Make barplots of all exons in a sample
 exon_covs:
 	$(CONDA_ACTIVATE) ; \
 	Rscript bin/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME) $(OUT_DIR)
