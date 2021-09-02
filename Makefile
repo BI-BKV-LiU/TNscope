@@ -29,7 +29,7 @@ all:
 ## multiqc: Create a multiqc report from all the pipeline results
 multiqc:
 	$(CONDA_ACTIVATE) ; \
-	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake
+	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake --ignore res2 --ignore res
 
 report:
 	$(CONDA_ACTIVATE) ; \
