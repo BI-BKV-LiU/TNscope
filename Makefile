@@ -31,6 +31,7 @@ multiqc:
 	$(CONDA_ACTIVATE) ; \
 	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake --ignore res2 --ignore res
 
+## report: Create a snakemake report of the pipeline
 report:
 	$(CONDA_ACTIVATE) ; \
 	snakemake --report report.html
@@ -39,3 +40,7 @@ report:
 exon_covs:
 	$(CONDA_ACTIVATE) ; \
 	Rscript bin/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME) $(OUT_DIR)
+
+## help: show this message
+help:
+	@grep '^##' ./Makefile
