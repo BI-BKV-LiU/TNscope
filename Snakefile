@@ -95,7 +95,6 @@ rule all:
         expand(RESULTS + 'variant_calling/{sample}.tnscope.vcf.gz', sample=SAMPLES),
         expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
         config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
-        config['workdir'] + '/exon_cov_analysis/all_cov_metrics.csv',
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
         # expand(LOGS + '{sample}.DeOCov.log', sample=SAMPLES),
