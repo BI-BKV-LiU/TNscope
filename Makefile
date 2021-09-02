@@ -34,7 +34,7 @@ multiqc:
 ## report: Create a snakemake report of the pipeline
 report:
 	$(CONDA_ACTIVATE) ; \
-	snakemake --report report.html
+	snakemake --cores 1 --report report.html
 
 ## exon_covs: Make barplots of all exons in a sample
 exon_covs:
