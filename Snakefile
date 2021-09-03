@@ -300,6 +300,8 @@ rule collectHsMetrics:
         gatk CollectHsMetrics \
         I={input.bam} \
         O={output.hs_metrics} \
+        PER_TARGET_COVERAGE={output.per_target_cov} \
+        PER_BASE_COVERAGE={output.per_base_cov} \
         R={params.ref} \
         BAIT_INTERVALS={input.baits_IL} \
         TARGET_INTERVALS={input.target_IL}
