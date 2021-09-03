@@ -18,6 +18,8 @@ SAMPLE_NAME = PVAL_65_S1
 OUT_DIR = res/
 
 CPUS = 90
+# In the CLI add after "make" 
+# ARGS=--forceall
 
 .PHONY: all, report, multiqc, exon_covs, help
 
