@@ -2,8 +2,12 @@
 !.gitignore
 !config.yml
 !fastqs/README.md
+!references
 !references/README.md
-!references/NexteraPE-PE.fa
+# Track current versions of interval lists
+!references/ILS
+!references/ILS/*
+
 !Makefile
 !LICENSE
 !README.md
