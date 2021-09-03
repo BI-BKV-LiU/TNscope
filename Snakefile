@@ -74,7 +74,7 @@ RECAL = RESULTS + 'baserecal/'
 FASTQC = RESULTS + 'fastqc/'
 ILS = RESULTS + 'intervalLists/'
 
-fasta = config['fasta']
+ref_genome = config['ref_genome']
 dbsnp = config['dbsnp']
 known_Mills_indels = config['known_Mills_indels']
 known_1000G_indels = config['known_1000G_indels']
@@ -145,7 +145,7 @@ rule mapping_tumor:
     input:
         R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
         R2 = config['tumor'] + "/{sample}" + R2SUFFIX,
-        fasta = config['fasta']
+        ref_genome = config['ref_genome']
     output:
         sam = temp(BAMS + '{sample}.tumor.sam'),
         bam = BAMS + '{sample}.tumor_sorted.bam'
@@ -166,8 +166,8 @@ rule mapping_tumor:
         -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' \
         -t {threads} \
         -K {params.K} \
-        -o {output.sam} {input.fasta} {input.R1} {input.R2} >> {log.bwa} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.fasta} \
+        -o {output.sam} {input.ref_genome} {input.R1} {input.R2} >> {log.bwa} 2>&1
+        $SENTIEON_INSTALL/bin/sentieon util sort -r {input.ref_genome} \
         -i {output.sam} \
         -o {output.bam} \
         -t {threads} \
@@ -178,7 +178,7 @@ rule mapping_tumor:
 rule metrics_tumor:
     input:
         bam = rules.mapping_tumor.output.bam,
-        fasta = config['fasta']
+        ref_genome = config['ref_genome']
     output:
         mqm = METRICS + '{sample}.tumor_mq_metrics.txt',
         qdm = METRICS + '{sample}.tumor_qd_metrics.txt',
@@ -197,7 +197,7 @@ rule metrics_tumor:
     shell:
         """
         $SENTIEON_INSTALL/bin/sentieon driver \
-        -r {input.fasta} \
+        -r {input.ref_genome} \
         -t {threads} \
         -i {input.bam} \
         --algo MeanQualityByCycle {output.mqm} \
@@ -217,7 +217,7 @@ rule metrics_tumor:
 rule markdup_tumor:
     input:
         bam = rules.mapping_tumor.output.bam,
-        fasta = config['fasta']
+        ref_genome = config['ref_genome']
     output:
         ns = MARKDUP + '{sample}.tumor_score.txt',
         dm = MARKDUP + '{sample}.tumor_dedup_metrics.txt',
@@ -245,7 +245,7 @@ rule markdup_tumor:
         --score_info {output.ns} \
         --metrics {output.dm} {output.bam} >> {log} 2>&1
         $SENTIEON_INSTALL/bin/sentieon driver \
-        -r {input.fasta} \
+        -r {input.ref_genome} \
         -t {threads} \
         --interval {params.targets} \
         -i {output.bam} \
@@ -264,7 +264,7 @@ rule bed2IntervalList:
     log:
         'logs/interval_list.log'
     params:
-        ref_dict = config["fasta"]
+        ref_dict = config["ref_genome"]
     threads:
         cpus
     shell:
@@ -290,7 +290,7 @@ rule collectHsMetrics:
     log:
         LOGS + 'collectHsMetrics.log'
     params:
-        ref = config["fasta"]
+        ref = config["ref_genome"]
     threads:
         cpus
     shell:
@@ -306,7 +306,7 @@ rule collectHsMetrics:
 rule baserecal_tumor:
     input:
         bam = rules.markdup_tumor.output.bam,
-        fasta = config['fasta']
+        ref_genome = config['ref_genome']
     output:
         rdt = RECAL + '{sample}.tumor_recal_data.table',
         post = RECAL + '{sample}.tumor_recal_data.table.post',
@@ -319,14 +319,14 @@ rule baserecal_tumor:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} \
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.ref_genome} \
         -t {threads} \
         -i {input.bam} \
         --algo QualCal \
         -k {dbsnp} \
         -k {known_Mills_indels} \
         -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
-        $SENTIEON_INSTALL/bin/sentieon driver -r {input.fasta} \
+        $SENTIEON_INSTALL/bin/sentieon driver -r {input.ref_genome} \
         -t {threads} \
         -i {input.bam} \
         -q {output.rdt} \
@@ -363,6 +363,7 @@ rule variant_calling:
         $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} \
         -t {threads} \
         -i {input.tumor_bam} \
+        -r {ref_genome} \
         -q {input.tumor_rdt} \
         --algo TNscope \
         --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
