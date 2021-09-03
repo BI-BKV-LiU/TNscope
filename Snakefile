@@ -98,7 +98,7 @@ rule all:
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
         # expand(LOGS + '{sample}.DeOCov.log', sample=SAMPLES),
-        expand(METRICS + '{sample}_hs_metrics.txt', sample=SAMPLES)
+        expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES)
        
 
 rule fastqc:
@@ -286,6 +286,8 @@ rule collectHsMetrics:
         baits_IL = rules.bed2IntervalList.output.baits_IL,
         target_IL = rules.bed2IntervalList.output.target_IL
     output:
+        per_target_cov = METRICS + '{sample}_per_target_cov.tsv',
+        per_base_cov = METRICS + '{sample}_per_base_cov.tsv',
         hs_metrics = METRICS + '{sample}_hs_metrics.txt'
     log:
         LOGS + 'collectHsMetrics.log'
