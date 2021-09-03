@@ -400,7 +400,7 @@ rule summarise_exon_coverages:
     output:
         bar_plot = config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
     params:    
-        metrics_tables = config['workdir'] + '/exon_cov_analysis/samples/'
+        metrics_tables = config['workdir'] + '/exon_cov_analysis/samples_with_transcript_inputs/'
     log:
         config['workdir'] + '/logs/summarise_exon_covs.log'
     run:
