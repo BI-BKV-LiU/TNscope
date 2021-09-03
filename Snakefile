@@ -364,12 +364,13 @@ rule variant_calling:
         cpus # set the maximum number of available cores
     shell:
         """
-        $SENTIEON_INSTALL/bin/sentieon driver -r {fasta} \
-        -t {threads} \
+        $SENTIEON_INSTALL/bin/sentieon driver \
         -i {input.tumor_bam} \
         -r {ref_genome} \
+        -t {threads} \
         -q {input.tumor_rdt} \
         --algo TNscope \
+        --min_base_qual 20 \
         --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
         """
 
