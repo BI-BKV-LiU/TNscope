@@ -31,7 +31,14 @@ all:
 ## multiqc: Create a multiqc report from all the pipeline results
 multiqc:
 	$(CONDA_ACTIVATE) ; \
-	multiqc . -f --ignore temp --ignore fastq-temp --ignore exp --ignore .snakemake --ignore res2 --ignore res
+	multiqc . -f \
+	--ignore temp \
+	--ignore fastq-temp \
+	--ignore exp \
+	--ignore .snakemake \
+	--ignore res2 \
+	--ignore res \
+	--ignore MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19
 
 ## report: Create a snakemake report of the pipeline
 report:
