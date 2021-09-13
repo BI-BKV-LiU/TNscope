@@ -97,7 +97,8 @@ rule all:
         config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
-        # expand(LOGS + '{sample}.DeOCov.log', sample=SAMPLES),
+        expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
+        expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
         expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES)
        
 
@@ -304,7 +305,37 @@ rule collectHsMetrics:
         PER_BASE_COVERAGE={output.per_base_cov} \
         R={params.ref} \
         BAIT_INTERVALS={input.baits_IL} \
-        TARGET_INTERVALS={input.target_IL}
+        TARGET_INTERVALS={input.target_IL} &> {log}
+        """   
+
+rule samtools_stats:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        RESULTS + 'samtools_stats/{sample}.stats.tsv'
+    log:
+        LOGS + '{sample}.samtools_stats.log'
+    threads:
+        cpus # set the maximum number of available cores
+    shell:
+        """
+        samtools stats --threads {threads} {input} > {output} 2>&1 {log}
+        """
+
+rule collectDuplicateMetrics:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        RESULTS + 'metrics/{sample}.dup.metrics.txt'
+    log:
+        LOGS + '{sample}.dup.metrics.log'
+    threads:
+        cpus # set the maximum number of available cores
+    shell:
+        """
+        picard CollectDuplicateMetrics --INPUT {input} \
+        --METRICS_FILE {output} \
+        --REFERENCE_SEQUENCE {ref_genome} 2>&1 {log}
         """   
 
 rule baserecal_tumor:
