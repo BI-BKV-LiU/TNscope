@@ -273,12 +273,12 @@ rule bed2IntervalList:
         gatk BedToIntervalList \
         I={input.baits} \
         O={output.baits_IL} \
-        SD={params.ref_dict}
+        SD={params.ref_dict} &> {log}
         
         gatk BedToIntervalList \
         I={input.targets} \
         O={output.target_IL} \
-        SD={params.ref_dict}
+        SD={params.ref_dict} &>> {log}
         """
 
 rule collectHsMetrics:
