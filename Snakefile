@@ -267,8 +267,6 @@ rule bed2IntervalList:
         'logs/interval_list.log'
     params:
         ref_dict = config["ref_genome"]
-    threads:
-        cpus
     shell:
         """
         gatk BedToIntervalList \
@@ -319,8 +317,6 @@ rule collectHsMetrics:
         LOGS + 'collectHsMetrics.log'
     params:
         ref = config["ref_genome"]
-    threads:
-        cpus
     shell:
         """
         gatk CollectHsMetrics \
