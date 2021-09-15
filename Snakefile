@@ -100,8 +100,7 @@ rule all:
         expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
-        expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES)
-       
+        expand(RESULTS + 'metrics/{sample}.aln.summary.metrics.txt', sample=SAMPLES),
 
 rule fastqc:
     input:
@@ -333,7 +332,22 @@ rule samtools_stats:
     input:
         rules.markdup_tumor.output.bam
     output:
-        RESULTS + 'samtools_stats/{sample}.stats.tsv'
+
+rule CollectAlignmentSummaryMetrics:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        RESULTS + 'metrics/{sample}.aln.summary.metrics.txt'
+    log:
+        LOGS + '{sample}.aln_summary.metrics.log'
+    shell:
+        """
+        picard CollectAlignmentSummaryMetrics \
+        --INPUT {input} \
+        --REFERENCE_SEQUENCE {ref_genome} \
+        --OUTPUT {output} >> {log} 2>&1
+        """
+
     log:
         LOGS + '{sample}.samtools_stats.log'
     threads:
