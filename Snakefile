@@ -101,6 +101,7 @@ rule all:
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.aln.summary.metrics.txt', sample=SAMPLES),
+        expand(LOGS + '{sample}.gcbias.metrics.log', sample=SAMPLES)
 
 rule fastqc:
     input:
@@ -358,13 +359,24 @@ rule CollectAlignmentSummaryMetrics:
         --OUTPUT {output} >> {log} 2>&1
         """
 
+rule CollectGcBiasMetrics:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        txt = RESULTS + 'metrics/{sample}.gcbias.metrics.txt',
+        chart = RESULTS + 'metrics/{sample}.gcbias.metrics.pdf',
+        summary = RESULTS + 'metrics/{sample}.gcbias.summary_metrics.txt'
     log:
-        LOGS + '{sample}.samtools_stats.log'
-    threads:
-        cpus # set the maximum number of available cores
+        LOGS + '{sample}.gcbias.metrics.log'
     shell:
         """
-        samtools stats --threads {threads} {input} > {output} 2>&1 {log}
+        picard CollectGcBiasMetrics \
+        --INPUT {input} \
+        --REFERENCE_SEQUENCE {ref_genome} \
+        --OUTPUT {output.txt} \
+        --CHART_OUTPUT {output.chart} \
+        --SUMMARY_OUTPUT {output.summary} \
+        --ALSO_IGNORE_DUPLICATES true >> {log} 2>&1
         """
 
 rule collectDuplicateMetrics:
