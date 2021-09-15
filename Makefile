@@ -41,7 +41,8 @@ multiqc:
 	--ignore logs \
 	--ignore MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19 \
 	--ignore res \
-	--ignore temp
+	--ignore exon_cov_analysis \
+	--ignore temp 2> temp/multiqc.log
 
 ## report: Create a snakemake report of the pipeline
 report:
