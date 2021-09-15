@@ -101,6 +101,7 @@ rule all:
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.aln.summary.metrics.txt', sample=SAMPLES),
+        expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.insertSize.metrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.gcbias.metrics.log', sample=SAMPLES)
 
