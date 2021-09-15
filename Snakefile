@@ -396,7 +396,7 @@ rule CollectInsertSizeMetrics:
         --REFERENCE_SEQUENCE {ref_genome} \
         --OUTPUT {output.ins} \
         --Histogram_FILE {output.hist} >> {log} 2>&1
-        """   
+        """
 
 rule baserecal_tumor:
     input:
@@ -420,7 +420,7 @@ rule baserecal_tumor:
         --algo QualCal \
         -k {dbsnp} \
         -k {known_Mills_indels} \
-        -k {known_1000G_indels} {output.rdt} >> {log} 2>&1
+        -k {known_1000G_indels} {output.rdt} > {log} 2>&1
         $SENTIEON_INSTALL/bin/sentieon driver -r {input.ref_genome} \
         -t {threads} \
         -i {input.bam} \
@@ -461,7 +461,7 @@ rule variant_calling:
         -q {input.tumor_rdt} \
         --algo TNscope \
         --min_base_qual 20 \
-        --tumor_sample {params.tumor_sample} {output.vcf} >> {log} 2>&1
+        --tumor_sample {params.tumor_sample} {output.vcf} > {log} 2>&1
         """
 
 rule exon_coverages:
