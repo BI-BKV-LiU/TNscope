@@ -98,6 +98,7 @@ rule all:
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
+        expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
         expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES)
        
@@ -279,6 +280,19 @@ rule bed2IntervalList:
         I={input.targets} \
         O={output.target_IL} \
         SD={params.ref_dict} &>> {log}
+        """
+
+
+rule samtools_idxstats:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        RESULTS + 'samtools_stats/{sample}.idxstats.tsv'
+    log:
+        LOGS + '{sample}.samtools_idxstats.log'
+    shell:
+        """
+        samtools stats {input} > {output}
         """
 
 rule collectHsMetrics:
