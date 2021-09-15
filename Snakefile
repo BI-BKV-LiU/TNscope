@@ -328,10 +328,20 @@ rule collectHsMetrics:
         TARGET_INTERVALS={input.target_IL} &> {log}
         """   
 
-rule samtools_stats:
+rule collectDuplicateMetrics:
     input:
         rules.markdup_tumor.output.bam
     output:
+        RESULTS + 'metrics/{sample}.dup.metrics.txt'
+    log:
+        LOGS + '{sample}.dup.metrics.log'
+    shell:
+        """
+        picard CollectDuplicateMetrics \
+        --INPUT {input} \
+        --METRICS_FILE {output} \
+        --REFERENCE_SEQUENCE {ref_genome} >> {log} 2>&1
+        """
 
 rule CollectAlignmentSummaryMetrics:
     input:
