@@ -282,6 +282,17 @@ rule bed2IntervalList:
         SD={params.ref_dict} &>> {log}
         """
 
+rule samtools_stats:
+    input:
+        rules.markdup_tumor.output.bam
+    output:
+        RESULTS + 'samtools_stats/{sample}.stats.tsv'
+    log:
+        LOGS + '{sample}.samtools_stats.log'
+    shell:
+        """
+        samtools stats {input} > {output}
+        """
 
 rule samtools_idxstats:
     input:
