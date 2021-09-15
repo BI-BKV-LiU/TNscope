@@ -101,6 +101,7 @@ rule all:
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.aln.summary.metrics.txt', sample=SAMPLES),
+        expand(LOGS + '{sample}.insertSize.metrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.gcbias.metrics.log', sample=SAMPLES)
 
 rule fastqc:
@@ -379,20 +380,21 @@ rule CollectGcBiasMetrics:
         --ALSO_IGNORE_DUPLICATES true >> {log} 2>&1
         """
 
-rule collectDuplicateMetrics:
+rule CollectInsertSizeMetrics:
     input:
         rules.markdup_tumor.output.bam
     output:
-        RESULTS + 'metrics/{sample}.dup.metrics.txt'
+        ins = RESULTS + 'metrics/{sample}.insert_size_metrics.txt',
+        hist = RESULTS + 'metrics/{sample}.insert_size_histogram.pdf'
     log:
-        LOGS + '{sample}.dup.metrics.log'
-    threads:
-        cpus # set the maximum number of available cores
+        LOGS + '{sample}.insertSize.metrics.log'
     shell:
         """
-        picard CollectDuplicateMetrics --INPUT {input} \
-        --METRICS_FILE {output} \
-        --REFERENCE_SEQUENCE {ref_genome} 2>&1 {log}
+        picard CollectInsertSizeMetrics \
+        --INPUT {input} \
+        --REFERENCE_SEQUENCE {ref_genome} \
+        --OUTPUT {output.ins} \
+        --Histogram_FILE {output.hist} >> {log} 2>&1
         """   
 
 rule baserecal_tumor:
@@ -433,7 +435,6 @@ rule baserecal_tumor:
         --after {output.post} {output.recal} >> {log} 2>&1
         $SENTIEON_INSTALL/bin/sentieon plot QualCal -o {output.rp} {output.recal}
         """
-
 
 rule variant_calling:
     input:
