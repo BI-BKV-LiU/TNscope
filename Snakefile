@@ -355,7 +355,7 @@ rule collectDuplicateMetrics:
         picard CollectDuplicateMetrics \
         --INPUT {input} \
         --METRICS_FILE {output} \
-        --REFERENCE_SEQUENCE {ref_genome} >> {log} 2>&1
+        --REFERENCE_SEQUENCE {ref_genome} &> {log}
         """
 
 rule CollectAlignmentSummaryMetrics:
@@ -418,8 +418,7 @@ rule baserecal_tumor:
         rdt = RECAL + '{sample}.tumor_recal_data.table',
         post = RECAL + '{sample}.tumor_recal_data.table.post',
         recal = RECAL + '{sample}.tumor_recal.csv',
-        rp = PLOTS + '{sample}.tumor_recal_plots.pdf',
-
+        rp = PLOTS + '{sample}.tumor_recal_plots.pdf'
     log:
         LOGS + '{sample}.tumor_recal.log'
     threads:
