@@ -98,8 +98,9 @@ rule all:
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
-        expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
-        expand(RESULTS + 'metrics/{sample}.aln.summary.metrics.txt', sample=SAMPLES),
+        expand(METRICS + '{sample}.dup.metrics.txt', sample=SAMPLES),
+        expand(METRICS + '{sample}.aln.summary.metrics.txt', sample=SAMPLES),
+        expand(METRICS + '{sample}.picard_marked_dup_metrics.txt', sample=SAMPLES),
         expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.insertSize.metrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.gcbias.metrics.log', sample=SAMPLES)
@@ -248,8 +249,8 @@ rule CreateSequenceDictionary:
     params:
     shell:
         """
-        picard CreateSequenceDictionary \ 
-        --REFERENCE {input} \ 
+        picard CreateSequenceDictionary \
+        --REFERENCE {input} \
         --OUTPUT {output} &> {log}
         """
 
@@ -332,7 +333,7 @@ rule markDuplicates:
         rules.mapping_tumor.output.bam
     output:
         marked_dup = MARKDUP + '{sample}.marked_duplicates.bam',
-        metrics = 'metrics/{sample}.picard_marked_dup_metrics.txt'
+        metrics = METRICS + '{sample}.picard_marked_dup_metrics.txt'
     log:
         LOGS + '{sample}.picard_marked_dup_metrics.log'
     shell:
@@ -347,7 +348,7 @@ rule collectDuplicateMetrics:
     input:
         rules.markDuplicates.output.marked_dup
     output:
-        RESULTS + 'metrics/{sample}.dup.metrics.txt'
+        METRICS + '{sample}.dup.metrics.txt'
     log:
         LOGS + '{sample}.dup.metrics.log'
     shell:
@@ -362,7 +363,7 @@ rule CollectAlignmentSummaryMetrics:
     input:
         rules.markdup_tumor.output.bam
     output:
-        RESULTS + 'metrics/{sample}.aln.summary.metrics.txt'
+        METRICS + '{sample}.aln.summary.metrics.txt'
     log:
         LOGS + '{sample}.aln_summary.metrics.log'
     shell:
@@ -377,9 +378,9 @@ rule CollectGcBiasMetrics:
     input:
         rules.markdup_tumor.output.bam
     output:
-        txt = RESULTS + 'metrics/{sample}.gcbias.metrics.txt',
-        chart = RESULTS + 'metrics/{sample}.gcbias.metrics.pdf',
-        summary = RESULTS + 'metrics/{sample}.gcbias.summary_metrics.txt'
+        txt = METRICS + '{sample}.gcbias.metrics.txt',
+        chart = METRICS + '{sample}.gcbias.metrics.pdf',
+        summary = METRICS + '{sample}.gcbias.summary_metrics.txt'
     log:
         LOGS + '{sample}.gcbias.metrics.log'
     shell:
@@ -397,8 +398,8 @@ rule CollectInsertSizeMetrics:
     input:
         rules.markdup_tumor.output.bam
     output:
-        ins = RESULTS + 'metrics/{sample}.insert_size_metrics.txt',
-        hist = RESULTS + 'metrics/{sample}.insert_size_histogram.pdf'
+        ins = METRICS + '{sample}.insert_size_metrics.txt',
+        hist = METRICS + '{sample}.insert_size_histogram.pdf'
     log:
         LOGS + '{sample}.insertSize.metrics.log'
     shell:
