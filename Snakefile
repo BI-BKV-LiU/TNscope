@@ -96,7 +96,6 @@ rule all:
         expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
         config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
-        expand(config['workdir'] + '/{sample}/multiqc_report.html', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
         expand(RESULTS + 'metrics/{sample}.dup.metrics.txt', sample=SAMPLES),
@@ -126,23 +125,6 @@ rule fastqc:
         --format fastq \
         --threads {threads} \
         --outdir {params.outdir} >> {log} 2>&1
-        """
-
-rule multiqc:
-    input:
-        FASTQC + '{sample}_R1_001_fastqc.zip'
-    output:
-        config['workdir'] + '/{sample}/' + 'multiqc_report.html'
-    log:
-        config['workdir'] + '/{sample}/' + 'logs/{sample}.multiqc.log'
-    params:
-        config['workdir'] + '/{sample}/'
-    shell:
-        """
-        multiqc \
-        -f \
-        --outdir {params} \
-        {params} >> {log} 2>&1
         """
 
 rule mapping_tumor:
