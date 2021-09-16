@@ -327,9 +327,25 @@ rule collectHsMetrics:
         TARGET_INTERVALS={input.target_IL} &> {log}
         """   
 
+rule markDuplicates:
+    input:
+        rules.mapping_tumor.output.bam
+    output:
+        marked_dup = MARKDUP + '{sample}.marked_duplicates.bam',
+        metrics = 'metrics/{sample}.picard_marked_dup_metrics.txt'
+    log:
+        LOGS + '{sample}.picard_marked_dup_metrics.log'
+    shell:
+        """
+        picard MarkDuplicates \
+        I={input} \
+        O={output.marked_dup} \
+        M={output.metrics} &> {log} 
+        """
+
 rule collectDuplicateMetrics:
     input:
-        rules.markdup_tumor.output.bam
+        rules.markDuplicates.output.marked_dup
     output:
         RESULTS + 'metrics/{sample}.dup.metrics.txt'
     log:
