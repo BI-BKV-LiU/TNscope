@@ -35,7 +35,6 @@ multiqc:
 	--verbose \
 	--profile-runtime \
 	--ignore .snakemake \
-	--ignore all_target_segments_covered_by_probes_combined_merged_probe_file_combined \
 	--ignore exp \
 	--ignore fastq-temp \
 	--ignore logs \
