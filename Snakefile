@@ -312,7 +312,8 @@ rule collectHsMetrics:
     log:
         LOGS + 'collectHsMetrics.log'
     params:
-        ref = config["ref_genome"]
+        ref = config["ref_genome"],
+        coverage_cap = 2000
     shell:
         """
         gatk CollectHsMetrics \
@@ -321,6 +322,7 @@ rule collectHsMetrics:
         PER_TARGET_COVERAGE={output.per_target_cov} \
         PER_BASE_COVERAGE={output.per_base_cov} \
         R={params.ref} \
+        COVERAGE_CAP={params.coverage_cap} \
         BAIT_INTERVALS={input.baits_IL} \
         TARGET_INTERVALS={input.target_IL} &> {log}
         """   
