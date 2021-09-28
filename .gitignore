@@ -29,6 +29,9 @@
 !exp/gather_Hs_metrics/hsmetrics_all_samples.tsv
 !exp/gather_Hs_metrics/join_tables.sh
 
+!exp/gather_metrics
+!exp/gather_metrics/join_tables.sh
+
 
 !exp/create_coverage_plots
 !exp/create_coverage_plots/sample_coverages
