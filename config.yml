@@ -6,8 +6,17 @@ dbsnp: "/home/rada/Documents/TNscope/references/dbsnp_138.hg19.vcf"
 known_Mills_indels: "/home/rada/Documents/TNscope/references/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf"
 known_1000G_indels: "/home/rada/Documents/TNscope/references/1000G_phase1.indels.hg19.sites.vcf"
 #off_targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/all_target_segments_not_covered_by_probes_ROstergotland_Onco_v2_1X_TE-94002956_hg19_210328152456.bed"
-targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/all_target_segments_covered_by_probes_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
-baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/merged_probe_file_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+# targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/all_target_segments_covered_by_probes_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+# baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/merged_probe_file_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+
+# Narrower panel
+# targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+# baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+
+# Larger panel
+targets: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
+baits: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
+
 workdir: "/home/rada/Documents/TNscope"
 platform: "ILLUMINA"
 R1_suffix: "_R1_001.fastq.gz"
