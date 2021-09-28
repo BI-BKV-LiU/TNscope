@@ -25,9 +25,9 @@ CPUS = 90
 
 all:
 	@($(CONDA_ACTIVATE) ; \
-	rm -f exon_cov_analysis/bar_plot_all_samples.html ; \
 	snakemake --cores $(CPUS) --config cpus=$(CPUS) $(ARGS))
 
+# rm -f exon_cov_analysis/bar_plot_all_samples.html ; \
 ## multiqc: Create a multiqc report from all the pipeline results
 multiqc:
 	$(CONDA_ACTIVATE) ; \
