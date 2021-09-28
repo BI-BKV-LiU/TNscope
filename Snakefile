@@ -118,13 +118,10 @@ rule fastqc:
         LOGS + '{sample}.fastqc.log'
     params:
         outdir = FASTQC
-    threads:
-        cpus
     shell:
         """
         fastqc {input.R1} {input.R2} \
         --format fastq \
-        --threads {threads} \
         --outdir {params.outdir} >> {log} 2>&1
         """
 
