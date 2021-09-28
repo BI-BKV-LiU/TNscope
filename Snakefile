@@ -239,26 +239,11 @@ rule markdup_tumor:
         --algo CoverageMetrics {output.cm} >> {log} 2>&1
         """
 
-rule CreateSequenceDictionary:
-    input:
-        config["ref_genome"]
-    output:
-        "references/ILS/reference.dict"
-    log:
-        'logs/CreateSequenceDictionary.log'
-    params:
-    shell:
-        """
-        picard CreateSequenceDictionary \
-        --REFERENCE {input} \
-        --OUTPUT {output} &> {log}
-        """
-
 rule bed2IntervalList:
     input:
         baits = config["baits"],
         targets = config["targets"],
-        ref_dict = rules.CreateSequenceDictionary.output
+        ref_dict = config["ref_dict"]
     output:
         baits_IL = '/home/rada/Documents/TNscope/references/ILS/bait.interval_list',
         target_IL = '/home/rada/Documents/TNscope/references/ILS/target.interval_list'
