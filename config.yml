@@ -10,12 +10,12 @@ known_1000G_indels: "/home/rada/Documents/TNscope/references/1000G_phase1.indels
 # baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/merged_probe_file_combined_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
 
 # Narrower panel
-# targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
-# baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+targets: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+baits: "/home/rada/Documents/TNscope/references/ROstergotland_Onco_v2_TE-94002956_hg19/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
 
 # Larger panel
-targets: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
-baits: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
+# targets: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
+# baits: "/home/rada/Documents/TNscope/exon_cov_analysis/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed"
 
 workdir: "/home/rada/Documents/TNscope"
 platform: "ILLUMINA"
