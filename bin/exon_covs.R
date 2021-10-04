@@ -1,10 +1,34 @@
 #!/usr/bin/env Rscript
+'This script creates multiple barplots (one for each exon) of a given coverage sample file
+The coverage sample file is created using similar to following command:
+bedtools coverage -hist -a genes_of_interest.bed -b PVAL_68_S2.tumor_deduped.bam > covs_PVAL_65_S1.tsv
 
-# This script creates multiple barplots (one for each exon) of a given coverage sample file
-#
-# The coverage sample file is created using similar to following command:
-# bedtools coverage -hist -a genes_of_interest.bed -b PVAL_68_S2.tumor_deduped.bam > covs_PVAL_65_S1.tsv
-#
+Usage:
+  exon_covs.R ship new <name>...
+  exon_covs.R ship <name> move <x> <y> [--speed=<kn>]
+  exon_covs.R ship shoot <x> <y>
+  exon_covs.R mine (set|remove) <x> <y> [--moored | --drifting]
+  exon_covs.R (-h | --help)
+  exon_covs.R --version
+
+Options:
+  -h --help     Show this screen.
+  --version     Show version.
+  -s --sample=<kn>  Sample file name, e.g. covs_PVAL_65_S1.tsv.
+  --moored      Moored (anchored) mine.
+  --drifting    Drifting mine.
+
+' -> doc
+
+library(docopt)
+library(tidyverse)
+library(ggplot2)
+library(patchwork)
+library(svglite)
+
+arguments <- docopt(doc, version = 'Exon coverages plot 1.0')
+print(arguments)
+
 # Input arguments:
 # 1. Sample file name, e.g. covs_PVAL_65_S1.tsv
 # 2. NCBI accession ID of the transcript of interest for which bedtools got coverage values, e.g. NM_000110.4
@@ -17,11 +41,6 @@
 # Rscript exp/create_barplot/exon_covs.R exp/create_barplot/cov/results_PVAL_65_S1.tsv NM_000110.4 DPYD PVAL_65_S1 temp/
 
 
-
-library(tidyverse)
-library(ggplot2)
-library(patchwork)
-library(svglite)
 
 #### Functions
 
