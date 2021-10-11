@@ -11,7 +11,7 @@ GNUP_CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; cond
 
 JOIN_SCRIPT = join_tables.sh
 #RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19
-RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.padded20.bed_with_duplicates_included
+RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed_with_duplicates_included
 #RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/pool1_pool2_nochr_3c.sort.merged.hg19.210311.met.annotated.bed_with_existant_ref_dict_used
 #RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/coverage_cap_200
 OUT_DIR = metrics
