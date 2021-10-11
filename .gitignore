@@ -55,4 +55,10 @@ exon_cov_analysis/all_samples.tsv
 # Avail bin directory
 !bin
 !bin/*
+
+# Presentation
+!presentation
+!presentation/*
+presentation/2021_10_12_twist_custom_design_presentation.html
+
 !multiqc_config.yaml

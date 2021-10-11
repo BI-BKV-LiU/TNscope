@@ -1,0 +1,221 @@
+---
+title: "Custom panel design"
+subtitle: "ROstergotland_Onco_v2_TE-94002956_hg19"
+author: ""
+institute: "Region Östergötland"
+date: "`r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    self_contained: true
+    css: [default, metropolis, metropolis-fonts]
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+
+---
+
+# Picard [CollectHsMetrics](https://broadinstitute.github.io/picard/picard-metric-definitions.html#HsMetrics)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+suppressPackageStartupMessages({
+  library(readr)
+  library(magrittr)
+  library(dplyr)
+  library(kableExtra)
+})
+read_tsv("data/metrics/hs_metrics_all_samples.tsv") %>%
+  select(one_of(c("SAMPLE...1","PCT_SELECTED_BASES","PCT_USABLE_BASES_ON_TARGET","PCT_TARGET_BASES_500X","MEAN_TARGET_COVERAGE","MEDIAN_TARGET_COVERAGE","ZERO_CVG_TARGETS_PCT"))) %>%
+  rename("SAMPLE"="SAMPLE...1") %>%
+  kbl() %>%
+  # kable_classic, kable_classic_2, kable_minimal, kable_material and kable_material_dark
+  kable_paper("hover", 
+              full_width = F, # Default is TRUE
+              font_size = 7,
+              position = "center" # center, left or right, float-left or float-right (text wrapping)
+             ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive", "bordered"))   
+```
+
+-[Link to Picard HSMetrics results for all samples](data/metrics/hs_metrics_all_samples.tsv)
+
+---
+
+# Flowcell Summary
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+read_tsv('data/Flowcell_Summary.tsv') %>%
+  kbl() %>%
+  # kable_classic, kable_classic_2, kable_minimal, kable_material and kable_material_dark
+  kable_paper("hover", 
+              full_width = F, # Default is TRUE
+              position = "center"
+             ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+-[Link to Flowcell Summary](data/Flowcell_Summary.tsv)
+
+---
+
+# Index QC
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+read_tsv('data/IndexQC.tsv') %>%
+  kbl() %>%
+  # kable_classic, kable_classic_2, kable_minimal, kable_material and kable_material_dark
+  kable_paper("hover", 
+              position = "center", # center, left or right, float-left or float-right (text wrapping)
+              font_size = 10
+             ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"))
+```
+
+- [Link to Index QC](data/IndexQC.xlsx)
+
+---
+
+# Exon average coverage plot: all samples
+
+<p><a href="./data/bar_plot_all_samples.html">
+<img src="data/imgs/gene_cov_plot.png" alt="Snakemake workflow schematic">
+</a></p>
+
+Figure based on [bedtools coverage](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html) output using:
+- bed file obtained from [UCSC's Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables) using gene identifier names of interest 
+- Sentieon Dedup (rule: `markdup_tumor`) output.
+
+---
+
+---
+
+class: center
+
+# In Silico steps for Panel evaluation
+
+## Snakemake pipeline overview
+
+<p><a href="./data/snakemake_workflow_report.html">
+<img src="data/imgs/smk-wf.png" alt="Snakemake workflow schematic">
+</a></p>
+
+## MultiQC report
+
+<p><a href="./data/multiqc_report.html">
+<img src="data/imgs/mqc.png" alt="MultiQC report">
+</a></p>
+
+---
+
+# Sentieon [bwa mem](https://support.sentieon.com/manual/usages/general/#bwa-mem-syntax) & [util sort](https://support.sentieon.com/manual/usages/general/#util-syntax)
+
+```python
+rule mapping_tumor:
+  input:
+    R1 = config['tumor'] + "/{sample}" + R1SUFFIX,
+    R2 = config['tumor'] + "/{sample}" + R2SUFFIX,
+    ref_genome = "references/AWS/UCSC_hg19/genome.fa"
+  output:
+    sam = temp(BAMS + '{sample}.tumor.sam'),
+    bam = BAMS + '{sample}.tumor_sorted.bam'
+  log:
+    bwa = LOGS + '{sample}.tumor_bwa.log',
+    sort = LOGS + '{sample}.tumor_sort.log'
+  params:
+    K = 10000000,
+    ID = lambda wildcards: t[wildcards.sample],
+    SM = "{sample}_tumor",
+    PL = "ILLUMINA"
+  shell:
+    """
+    $SENTIEON_INSTALL/bin/sentieon bwa mem -M -R '@RG\\tID:{params.ID}\\tSM:{params.SM}\\tPL:{params.PL}' \
+    -t {threads} -K {params.K} -o {output.sam} {input.ref_genome} {input.R1} {input.R2} >> {log.bwa} 2>&1
+    $SENTIEON_INSTALL/bin/sentieon util sort -r {input.ref_genome} \
+    -i {output.sam} -o {output.bam} -t {threads} --sam2bam >> {log.sort} 2>&1
+    """
+```
+---
+
+# Sentieon [Dedup](https://support.sentieon.com/manual/usages/general/#dedup-algorithm)
+
+```python
+rule markdup_tumor:
+  input:
+    bam = rules.mapping_tumor.output.bam,
+    ref_genome = "references/AWS/UCSC_hg19/genome.fa"
+  output:
+    ns = MARKDUP + '{sample}.tumor_score.txt',
+    dm = MARKDUP + '{sample}.tumor_dedup_metrics.txt',
+    bam = BAMS + '{sample}.tumor_deduped.bam',
+    cm = METRICS + 'cov/{sample}'
+  log:
+    LOGS + '{sample}.tumor_dedup.log'
+  params:
+    targets = "MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed"
+  shell:
+    """
+    $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} \
+    --algo LocusCollector --fun score_info {output.ns} >> {log} 2>&1
+    $SENTIEON_INSTALL/bin/sentieon driver -t {threads} -i {input.bam} --algo Dedup --rmdup \
+    --score_info {output.ns} --metrics {output.dm} {output.bam} >> {log} 2>&1
+    $SENTIEON_INSTALL/bin/sentieon driver -r {input.ref_genome} -t {threads} \
+    --interval {params.targets} -i {output.bam} --algo CoverageMetrics {output.cm} >> {log} 2>&1
+    """
+```
+
+---
+
+# [Picard BedToIntervalList](https://gatk.broadinstitute.org/hc/en-us/articles/360036883931-BedToIntervalList-Picard-)
+
+```python
+rule bed2IntervalList:
+  input:
+    baits = "MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed",
+    targets = "MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed",
+    ref_dict = "references/AWS/UCSC_hg19/genome.dict"
+  output:
+    baits_IL = 'references/ILS/bait.interval_list',
+    target_IL = 'references/ILS/target.interval_list'
+  log:
+    'logs/interval_list.log'
+  shell:
+    """
+    gatk BedToIntervalList \
+    I={input.baits} \
+    O={output.baits_IL} \
+    SD={input.ref_dict} &> {log}
+    gatk BedToIntervalList \
+    I={input.targets} \
+    O={output.target_IL} \
+    SD={input.ref_dict} &>> {log}
+    """
+```
+
+---
+
+# [Picard CollectHsMetrics](https://gatk.broadinstitute.org/hc/en-us/articles/360036856051-CollectHsMetrics-Picard-)
+
+```python
+rule collectHsMetrics:
+  input:
+    bam = rules.markdup_tumor.output.bam,
+    baits_IL = rules.bed2IntervalList.output.baits_IL,
+    target_IL = rules.bed2IntervalList.output.target_IL
+  output:
+    per_target_cov = METRICS + '{sample}_per_target_cov.tsv',
+    per_base_cov = METRICS + '{sample}_per_base_cov.tsv',
+    hs_metrics = METRICS + '{sample}_hs_metrics.txt'
+  log:
+    LOGS + 'collectHsMetrics.log'
+  params:
+    ref = "references/AWS/UCSC_hg19/genome.fa",
+    coverage_cap = 2000
+  shell:
+    """
+    gatk CollectHsMetrics I={input.bam} O={output.hs_metrics} PER_TARGET_COVERAGE={output.per_target_cov} \
+    PER_BASE_COVERAGE={output.per_base_cov} R={params.ref} COVERAGE_CAP={params.coverage_cap} \
+    BAIT_INTERVALS={input.baits_IL} TARGET_INTERVALS={input.target_IL} &> {log}
+    """
+```
+---
