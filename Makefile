@@ -42,6 +42,7 @@ multiqc:
 	--ignore MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.padded20.bed_with_duplicates_included \
 	--ignore res \
 	--ignore exon_cov_analysis \
+	--ignore presentation \
 	--ignore temp 2> temp/multiqc.log
 
 ## report: Create a snakemake report of the pipeline
