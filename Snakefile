@@ -259,30 +259,6 @@ rule bed2IntervalList:
         SD={input.ref_dict} &>> {log}
         """
 
-rule samtools_stats:
-    input:
-        rules.markdup_tumor.output.bam
-    output:
-        RESULTS + 'samtools_stats/{sample}.stats.tsv'
-    log:
-        LOGS + '{sample}.samtools_stats.log'
-    shell:
-        """
-        samtools stats {input} > {output}
-        """
-
-rule samtools_idxstats:
-    input:
-        rules.markdup_tumor.output.bam
-    output:
-        RESULTS + 'samtools_stats/{sample}.idxstats.tsv'
-    log:
-        LOGS + '{sample}.samtools_idxstats.log'
-    shell:
-        """
-        samtools stats {input} > {output}
-        """
-
 rule collectHsMetrics:
     input:
         bam = rules.markdup_tumor.output.bam,
@@ -324,6 +300,30 @@ rule markDuplicates:
         I={input} \
         O={output.marked_dup} \
         M={output.metrics} &> {log} 
+        """
+
+rule samtools_stats:
+    input:
+        rules.markDuplicates.output.marked_dup
+    output:
+        RESULTS + 'samtools_stats/{sample}.stats.tsv'
+    log:
+        LOGS + '{sample}.samtools_stats.log'
+    shell:
+        """
+        samtools stats {input} > {output}
+        """
+
+rule samtools_idxstats:
+    input:
+        rules.markDuplicates.output.marked_dup
+    output:
+        RESULTS + 'samtools_stats/{sample}.idxstats.tsv'
+    log:
+        LOGS + '{sample}.samtools_idxstats.log'
+    shell:
+        """
+        samtools stats {input} > {output}
         """
 
 rule collectDuplicateMetrics:
