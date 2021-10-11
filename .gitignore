@@ -55,3 +55,4 @@ exon_cov_analysis/all_samples.tsv
 # Avail bin directory
 !bin
 !bin/*
+!multiqc_config.yaml

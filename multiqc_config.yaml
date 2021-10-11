@@ -1,0 +1,9 @@
+extra_fn_clean_exts:
+  - ".dup.metrics"
+  - ".tumor_aln_metrics"
+  - ".tumor_deduped"
+  - ".tumor_is_metrics"
+  - ".tumor_sorted"
+extra_fn_clean_trim:
+  - "_R1_001"
+  - "_R2_001"

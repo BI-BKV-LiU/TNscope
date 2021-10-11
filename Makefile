@@ -32,13 +32,14 @@ all:
 multiqc:
 	$(CONDA_ACTIVATE) ; \
 	multiqc . -f \
+	--config multiqc_config.yaml \
 	--verbose \
 	--profile-runtime \
 	--ignore .snakemake \
 	--ignore exp \
 	--ignore fastq-temp \
 	--ignore logs \
-	--ignore MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19 \
+	--ignore MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.padded20.bed_with_duplicates_included \
 	--ignore res \
 	--ignore exon_cov_analysis \
 	--ignore temp 2> temp/multiqc.log
