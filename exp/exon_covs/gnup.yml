@@ -1,0 +1,5 @@
+name: gnup
+channels:
+  - conda-forge
+dependencies:
+  - parallel = 20210822
