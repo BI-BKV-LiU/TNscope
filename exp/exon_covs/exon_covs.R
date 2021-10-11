@@ -1,0 +1,1 @@
+/home/rada/Documents/TNscope/bin/exon_covs.R
