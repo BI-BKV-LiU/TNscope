@@ -13,7 +13,6 @@ output:
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
-
 ---
 
 # Picard [CollectHsMetrics](https://broadinstitute.github.io/picard/picard-metric-definitions.html#HsMetrics)
