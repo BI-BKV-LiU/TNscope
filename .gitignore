@@ -32,22 +32,21 @@
 !exp/gather_metrics
 !exp/gather_metrics/join_tables.sh
 
-
-!exp/create_coverage_plots
-!exp/create_coverage_plots/sample_coverages
-!exp/create_coverage_plots/sample_coverages/bar
-!exp/create_coverage_plots/sample_coverages/bar/*
-!exp/create_coverage_plots/sample_coverages/box
-!exp/create_coverage_plots/sample_coverages/box/*
-!exp/create_coverage_plots/sample_coverages/metrics
-!exp/create_coverage_plots/sample_coverages/metrics/*
-!exp/create_coverage_plots/env.yml
-!exp/create_coverage_plots/create_coverages.ipynb
-!exp/create_coverage_plots/ids.tsv
-!exp/create_coverage_plots/twist_design_bed.geneTrack.tsv
-!exp/create_coverage_plots/gene_names.tsv
-!exp/create_coverage_plots/cat_samples.sh
-!exp/create_coverage_plots/find_names.sh
+!exp/create_coverage_plots_by_gene_ipynb
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/bar
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/bar/*
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/box
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/box/*
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/metrics
+!exp/create_coverage_plots_by_gene_ipynb/sample_coverages/metrics/*
+!exp/create_coverage_plots_by_gene_ipynb/env.yml
+!exp/create_coverage_plots_by_gene_ipynb/create_coverages.ipynb
+!exp/create_coverage_plots_by_gene_ipynb/ids.tsv
+!exp/create_coverage_plots_by_gene_ipynb/twist_design_bed.geneTrack.tsv
+!exp/create_coverage_plots_by_gene_ipynb/gene_names.tsv
+!exp/create_coverage_plots_by_gene_ipynb/cat_samples.sh
+!exp/create_coverage_plots_by_gene_ipynb/find_names.sh
 !exon_cov_analysis
 !exon_cov_analysis/*
 # This is too big
