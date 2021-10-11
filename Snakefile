@@ -197,7 +197,6 @@ rule metrics_tumor:
         $SENTIEON_INSTALL/bin/sentieon plot InsertSizeMetricAlgo -o {output.isp} {output.ism}
         """
 
-
 rule markdup_tumor:
     input:
         bam = rules.mapping_tumor.output.bam,
@@ -211,7 +210,6 @@ rule markdup_tumor:
         LOGS + '{sample}.tumor_dedup.log'
     params:
         targets = config["targets"]
-        #off_targets = config["off_targets"]
     threads:
         cpus # set the maximum number of available cores
     shell:
@@ -470,7 +468,6 @@ rule exon_coverages:
         "exon_cov_analysis/all_samples.tsv"
     shell:
         """
-        SAMPLE=$(basename -s .tumor_deduped.bam {input.tumor_bam})
         bedtools coverage -hist \
         -a {input.eoi} \
         -b {input.tumor_bam} > {output}
