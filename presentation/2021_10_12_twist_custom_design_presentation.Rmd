@@ -37,7 +37,7 @@ read_tsv("data/metrics/hs_metrics_all_samples.tsv") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive", "bordered"))   
 ```
 
--[Link to Picard HSMetrics results for all samples](data/metrics/hs_metrics_all_samples.tsv)
+[Link to Picard HSMetrics results for all samples](data/metrics/hs_metrics_all_samples.tsv)
 
 ---
 
@@ -54,7 +54,7 @@ read_tsv('data/Flowcell_Summary.tsv') %>%
   kable_styling(bootstrap_options = c("striped", "hover"))
 ```
 
--[Link to Flowcell Summary](data/Flowcell_Summary.tsv)
+[Link to Flowcell Summary](data/Flowcell_Summary.tsv)
 
 ---
 
@@ -71,7 +71,7 @@ read_tsv('data/IndexQC.tsv') %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"))
 ```
 
-- [Link to Index QC](data/IndexQC.xlsx)
+[Link to Index QC](data/IndexQC.xlsx)
 
 ---
 
@@ -83,7 +83,7 @@ read_tsv('data/IndexQC.tsv') %>%
 
 Figure based on [bedtools coverage](https://bedtools.readthedocs.io/en/latest/content/tools/coverage.html) output using:
 - bed file obtained from [UCSC's Table Browser](http://genome.ucsc.edu/cgi-bin/hgTables) using gene identifier names of interest 
-- Sentieon Dedup (rule: `markdup_tumor`) output.
+- Sentieon Dedup (rule: `markdup_tumor`) output
 
 ---
 
