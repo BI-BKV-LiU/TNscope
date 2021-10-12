@@ -31,7 +31,7 @@ read_tsv("data/metrics/hs_metrics_all_samples.tsv") %>%
   # kable_classic, kable_classic_2, kable_minimal, kable_material and kable_material_dark
   kable_paper("hover", 
               full_width = F, # Default is TRUE
-              font_size = 7,
+              font_size = 8,
               position = "center" # center, left or right, float-left or float-right (text wrapping)
              ) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive", "bordered"))   
