@@ -10,6 +10,12 @@ CURRENT_CONDA_ENV_NAME = TNscope
 # Note that the extra "conda activate" is needed to ensure that the activate floats env to the front of PATH
 CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate $(CURRENT_CONDA_ENV_NAME)
 
+GNUP_CONDA_ENV_NAME = gnup
+# Note that the extra "conda activate" is needed to ensure that the activate floats env to the front of PATH
+GNUP_CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate $(GNUP_CONDA_ENV_NAME)
+
+RESULTS_ROOT_DIR = /home/rada/Documents/TNscope/MergedProbe_ROstergotland_Onco_v2_TE-94002956_hg19.bed_with_duplicates_included
+
 # Sample name for transcript exon coverage barplots
 IN_FILE = exp/create_barplot/cov/results_PVAL_65_S1.tsv
 NCBI_NAME = NM_000110.4
@@ -54,6 +60,11 @@ report:
 exon_covs:
 	$(CONDA_ACTIVATE) ; \
 	Rscript bin/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME) $(OUT_DIR)
+
+fetch_vcfs:
+	$(GNUP_CONDA_ACTIVATE) ; \
+	mkdir -p $(OUT_DIR) ; \
+	find $(RESULTS_ROOT_DIR) -name "PVAL_*.tnscope.vcf.gz" -type f | parallel cp {} $(OUT_DIR)
 
 ## help: show this message
 help:
