@@ -513,7 +513,7 @@ rule summarise_exon_coverages:
             # Parse and expand the transcript data column
             df[['ID', 'rest']] = df['name'].str.split('_cds_', -1, expand=True) # https://stackoverflow.com/a/39358924
             df[["exon_number", "unknown", "exon_chrom", "exon_start_pos", "exon_strand"]] = df['rest'].str.split('_', -1, expand=True)
-            df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
+            #df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
             #sample_name = df.iloc[0][header[0]]
             df = df.drop(["name","rest"], axis = 1)
             # Assign correct datatypes to each column
@@ -538,7 +538,7 @@ rule summarise_exon_coverages:
             # Add gene names to the current df
             df = df.merge(right=gene_names,
                           how='left',
-                          left_on='base_ID',
+                          left_on='ID',
                           right_on='name')
             
             # Join symbols and IDs into one column so they can be visualised as one entity
