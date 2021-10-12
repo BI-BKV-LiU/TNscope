@@ -66,3 +66,6 @@ exon_cov_analysis/all_samples.tsv
 presentation/2021_10_12_twist_custom_design_presentation.html
 
 !multiqc_config.yaml
+
+!exp/generalise_avg_coverage_determination
+!exp/generalise_avg_coverage_determination/*
