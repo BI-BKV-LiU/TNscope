@@ -61,6 +61,7 @@ exon_covs:
 	$(CONDA_ACTIVATE) ; \
 	Rscript bin/exon_covs.R $(IN_FILE) $(NCBI_NAME) $(COMMON_NAME) $(SAMPLE_NAME) $(OUT_DIR)
 
+## fetch_vcfs: Copy vcf files to the desired output directory
 fetch_vcfs:
 	$(GNUP_CONDA_ACTIVATE) ; \
 	mkdir -p $(OUT_DIR) ; \
