@@ -22,7 +22,11 @@ EXON_COVS_CONDA_ACTIVATE = source $$(conda info --base)/etc/profile.d/conda.sh ;
 ALL_EXON_COV_FILES_DIR = cov
 OUT_FILES_DIR = temp
 
-ARGS = -n NM_000110.4 -g DPYD -s PVAL_65_S1 -o $(OUT_FILES_DIR)/ $(ALL_EXON_COV_FILES_DIR)/PVAL_65_S1.exon_cov.tsv
+ARGS = --ncbi NM_000110.4 \
+--gene_name DPYD \
+--sample_name PVAL_65_S1 \
+--outdir $(OUT_FILES_DIR)/ \
+$(ALL_EXON_COV_FILES_DIR)/PVAL_65_S1.exon_cov.tsv
 
 .PHONY: clean, all, fetch_sample_coverage_files, create_individual_exon_cov_plot
 
