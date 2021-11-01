@@ -69,3 +69,8 @@ presentation/2021_10_12_twist_custom_design_presentation.html
 
 !exp/generalise_avg_coverage_determination
 !exp/generalise_avg_coverage_determination/*
+
+!exp/off_target_regions_99
+!exp/off_target_regions_99/Makefile
+!exp/off_target_regions_99/summarise.awk
+!exp/off_target_regions_99/flag_GoIs.awk
