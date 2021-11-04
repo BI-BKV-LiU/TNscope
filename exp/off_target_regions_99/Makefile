@@ -164,6 +164,10 @@ remove_cds_start_stop_codons:
 change_dots_to_introns:
 	sed -i -e 's/\t\.\t/\tintron\t/' -e 's/\t-1\t-1/\tNA\tNA/g' $(REMOVED)
 
+remove_duplicate_rows:
+	$(CONDA_ACTIVATE) ; \
+	gawk -f remove_duplicate_rows.awk $(REMOVED) > $(DEDUPED)
+
 ## help: Show this message
 help:
 	@grep '^##' ./Makefile
