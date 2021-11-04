@@ -158,6 +158,9 @@ append_missing:
 check_how_many_regions:
 	cut -d $$'\t' -f1-3 $(UNUNIQUE) | sort -u | wc -l
 
+remove_cds_start_stop_codons:
+	grep -v CDS $(UNUNIQUE) | grep -v stop_codon | grep -v start_codon > $(REMOVED)
+
 ## help: Show this message
 help:
 	@grep '^##' ./Makefile
