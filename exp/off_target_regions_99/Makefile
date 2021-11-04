@@ -82,10 +82,11 @@ join_bed:
 ## join_tsv: Join UCSC table browser tsv-format annotations to otr
 join_tsv:
 	$(CONDA_ACTIVATE) ; \
-	bedtools intersect -a $(TWIST_99_OFF_TARGET) \
-	-b off_target_regions_99.annot.bed \
+	bedtools intersect \
+	-a $(TWIST_99_OFF_TARGET) \
+	-b off_target_regions_99.annot.tsv \
 	-wa \
-	-wb > $(INTERSECT_BED)
+	-wb > int_out.tsv
 
 ## take_names: Extract NCBI_id and NCBI_gene_name/symbol information from UCSC table browser tsv format annotations 
 take_names:
