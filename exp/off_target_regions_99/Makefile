@@ -55,6 +55,22 @@ add_actions, \
 clean, \
 help
 
+all: clean \
+join_bed \
+take_names \
+join_names \
+drop_cols \
+take_unique_positions \
+add_flags \
+join_gtf \
+remove_uninteresting_data \
+remove_ununique_regions \
+append_missing \
+remove_cds_start_stop_codons \
+change_dots_to_introns \
+remove_duplicate_rows \
+add_actions
+
 ## join_bed: Join UCSC table browser bed-format annotations to off-target effect regions (otr)
 join_bed:
 	$(CONDA_ACTIVATE) ; \
