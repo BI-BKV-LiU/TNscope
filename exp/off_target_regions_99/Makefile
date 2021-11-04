@@ -175,6 +175,20 @@ add_actions:
 	$(CONDA_ACTIVATE) ; \
 	gawk -f add_actions.awk $(DEDUPED) > $(DEDUP_ANNOT)
 
+clean:
+	rm -f $(INTERSECT_BED) \
+	$(NAME_NAME2) \
+	$(ANNOT) \
+	$(DROP) \
+	$(UNFLAGGED) \
+	$(FLAGGED) \
+	$(INTERSECT_GTF) \
+	$(FEATURES) \
+	$(UNUNIQUE) \
+	$(REMOVED) \
+	$(DEDUPED) \
+	$(DEDUP_ANNOT)
+
 ## help: Show this message
 help:
 	@grep '^##' ./Makefile
