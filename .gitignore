@@ -75,3 +75,4 @@ presentation/2021_10_12_twist_custom_design_presentation.html
 !exp/off_target_regions_99/env.yml
 !exp/off_target_regions_99/*.awk
 !exp/off_target_regions_99/README.md
+!exp/off_target_regions_99/ucsc_table_browser.png
