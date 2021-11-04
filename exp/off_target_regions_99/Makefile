@@ -168,6 +168,9 @@ remove_duplicate_rows:
 	$(CONDA_ACTIVATE) ; \
 	gawk -f remove_duplicate_rows.awk $(REMOVED) > $(DEDUPED)
 
+check_that_we_have_same_regions:
+	comm -12 <(sort $(TWIST_99_OFF_TARGET)) <(cut -d $$'\t' -f1-3 $(DEDUPED) | sort) | cat -n
+
 ## help: Show this message
 help:
 	@grep '^##' ./Makefile
