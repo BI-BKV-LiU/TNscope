@@ -26,7 +26,31 @@ UNUNIQUE = ununique_removed.tsv
 
 TWIST_99_OFF_TARGET = target_bases_not_covered_ROstergotland_Onco_v2_TE-94002956_hg19_150XDS_cutoff_99_0.bed
 
-all: join_bed take_names join_names drop_cols take_unique_positions add_flags join_gtf remove_uninteresting_data append_missing
+.PHONY: all, \
+join_bed, \
+join_tsv, \
+take_names, \
+join_names, \
+innerjoin_names, \
+drop_cols, \
+take_unique_positions, \
+check_missing, \
+add_flags, \
+check_annot_genes, \
+check_GoI_regions, \
+check_non_GoI_regions, \
+join_gtf, \
+remove_uninteresting_data, \
+remove_ununique_regions, \
+append_missing, \
+check_how_many_regions, \
+remove_cds_start_stop_codons, \
+change_dots_to_introns, \
+remove_duplicate_rows, \
+check_that_we_have_same_regions, \
+add_actions, \
+clean, \
+help
 
 ## join_bed: Join UCSC table browser bed-format annotations to off-target effect regions (otr)
 join_bed:
