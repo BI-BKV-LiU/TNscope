@@ -171,6 +171,10 @@ remove_duplicate_rows:
 check_that_we_have_same_regions:
 	comm -12 <(sort $(TWIST_99_OFF_TARGET)) <(cut -d $$'\t' -f1-3 $(DEDUPED) | sort) | cat -n
 
+add_actions:
+	$(CONDA_ACTIVATE) ; \
+	gawk -f add_actions.awk $(DEDUPED) > $(DEDUP_ANNOT)
+
 ## help: Show this message
 help:
 	@grep '^##' ./Makefile
