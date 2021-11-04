@@ -23,6 +23,9 @@ UNFLAGGED = unflagged.tsv
 FLAGGED = flagged.bed
 FEATURES = features.tsv
 UNUNIQUE = ununique_removed.tsv
+REMOVED = features_removed.tsv
+DEDUPED = deduped.tsv
+DEDUP_ANNOT = target_bases_not_covered_ROstergotland_Onco_v2_TE-94002956_hg19_150XDS_cutoff_99_0.annotated.tsv
 
 TWIST_99_OFF_TARGET = target_bases_not_covered_ROstergotland_Onco_v2_TE-94002956_hg19_150XDS_cutoff_99_0.bed
 
