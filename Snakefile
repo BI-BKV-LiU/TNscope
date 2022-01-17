@@ -93,8 +93,6 @@ rule all:
         expand(BAMS + '{sample}.tumor_deduped.bam', sample=SAMPLES),
         expand(RECAL + '{sample}.tumor_recal_data.table', sample=SAMPLES),
         expand(RESULTS + 'variant_calling/{sample}.tnscope.vcf.gz', sample=SAMPLES),
-        expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
-        config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
         expand(LOGS + '{sample}.fastqc.log', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.stats.tsv', sample=SAMPLES),
         expand(RESULTS + 'samtools_stats/{sample}.idxstats.tsv', sample=SAMPLES),
@@ -104,6 +102,8 @@ rule all:
         expand(LOGS + 'collectHsMetrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.insertSize.metrics.log', sample=SAMPLES),
         expand(LOGS + '{sample}.gcbias.metrics.log', sample=SAMPLES)
+        # expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
+        # config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
 
 rule fastqc:
     input:
@@ -456,148 +456,148 @@ rule variant_calling:
         --tumor_sample {params.tumor_sample} {output.vcf} > {log} 2>&1
         """
 
-rule exon_coverages:
-    input:
-        eoi = config['exons_of_interest'],
-        tumor_bam = rules.markdup_tumor.output.bam
-    output:
-        RESULTS + 'exon_cov/{sample}.exon_cov.tsv'
-    log:
-        LOGS + '{sample}.exon_cov.log'
-    params:
-        "exon_cov_analysis/all_samples.tsv"
-    shell:
-        """
-        bedtools coverage -hist \
-        -a {input.eoi} \
-        -b {input.tumor_bam} > {output}
-        sed 's/^/{wildcards.sample}\t/' {output} >> {params}
-        """
+# rule exon_coverages:
+#     input:
+#         eoi = config['exons_of_interest'],
+#         tumor_bam = rules.markdup_tumor.output.bam
+#     output:
+#         RESULTS + 'exon_cov/{sample}.exon_cov.tsv'
+#     log:
+#         LOGS + '{sample}.exon_cov.log'
+#     params:
+#         "exon_cov_analysis/all_samples.tsv"
+#     shell:
+#         """
+#         bedtools coverage -hist \
+#         -a {input.eoi} \
+#         -b {input.tumor_bam} > {output}
+#         sed 's/^/{wildcards.sample}\t/' {output} >> {params}
+#         """
 
-rule summarise_exon_coverages:
-    input:
-        samples = expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
-        eoi = config['exon_names']
-    output:
-        bar_plot = config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
-    params:    
-        metrics_tables = config['workdir'] + '/exon_cov_analysis/samples_with_transcript_inputs/'
-    log:
-        config['workdir'] + '/logs/summarise_exon_covs.log'
-    run:
-        import pandas as pd
-        import plotly.express as px
-        import plotly.io as io
-        import os
+# rule summarise_exon_coverages:
+#     input:
+#         samples = expand(RESULTS + 'exon_cov/{sample}.exon_cov.tsv', sample=SAMPLES),
+#         eoi = config['exon_names']
+#     output:
+#         bar_plot = config['workdir'] + '/exon_cov_analysis/bar_plot_all_samples.html',
+#     params:    
+#         metrics_tables = config['workdir'] + '/exon_cov_analysis/samples_with_transcript_inputs/'
+#     log:
+#         config['workdir'] + '/logs/summarise_exon_covs.log'
+#     run:
+#         import pandas as pd
+#         import plotly.express as px
+#         import plotly.io as io
+#         import os
  
-        gene_names = pd.read_csv(input.eoi, 
-                                sep="\t", 
-                                names=["name", "symbol"],
-                                header=0)
+#         gene_names = pd.read_csv(input.eoi, 
+#                                 sep="\t", 
+#                                 names=["name", "symbol"],
+#                                 header=0)
 
-        header = ["chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"]
+#         header = ["chrom", "start", "end", "name", "score", "strand","depth","num_bases_at_depth","size_of_feature","pros_of_feature_at_depth"]
 
-        fig_list = []
+#         fig_list = []
         
-        for f_path in input.samples:
-            sample = pd.read_csv(f_path, 
-                                 sep="\t", 
-                                 names=header)
+#         for f_path in input.samples:
+#             sample = pd.read_csv(f_path, 
+#                                  sep="\t", 
+#                                  names=header)
             
-            sample_name = get_sample_name(f_path)
+#             sample_name = get_sample_name(f_path)
 
-            # Remove summary 'all' sections from the df since they have only 6 fields and
-            # aren't really useful now otherwise either
-            df = sample[sample.chrom != "all"].copy()
+#             # Remove summary 'all' sections from the df since they have only 6 fields and
+#             # aren't really useful now otherwise either
+#             df = sample[sample.chrom != "all"].copy()
         
-            # Parse and expand the transcript data column
-            df[['ID', 'rest']] = df['name'].str.split('_cds_', -1, expand=True) # https://stackoverflow.com/a/39358924
-            df[["exon_number", "unknown", "exon_chrom", "exon_start_pos", "exon_strand"]] = df['rest'].str.split('_', -1, expand=True)
-            #df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
-            #sample_name = df.iloc[0][header[0]]
-            df = df.drop(["name","rest"], axis = 1)
-            # Assign correct datatypes to each column
-            df = df.astype({
-                'chrom':'str',
-                'start':'int',
-                'end':'int',
-                'score':'float',
-                'strand':'str',
-                'depth':'int',
-                'num_bases_at_depth':'int',
-                'size_of_feature':'int',
-                'pros_of_feature_at_depth':'float',
-                'ID':'category',
-                "exon_number":'category', 
-                "unknown":'category', 
-                "exon_chrom":"category", 
-                "exon_start_pos":"int", 
-                "exon_strand":"category"
-                }
-                )
-            # Add gene names to the current df
-            df = df.merge(right=gene_names,
-                          how='left',
-                          left_on='ID',
-                          right_on='name')
+#             # Parse and expand the transcript data column
+#             df[['ID', 'rest']] = df['name'].str.split('_cds_', -1, expand=True) # https://stackoverflow.com/a/39358924
+#             df[["exon_number", "unknown", "exon_chrom", "exon_start_pos", "exon_strand"]] = df['rest'].str.split('_', -1, expand=True)
+#             #df[['base_ID', 'version']] = df['ID'].str.split('.', 2, expand=True)
+#             #sample_name = df.iloc[0][header[0]]
+#             df = df.drop(["name","rest"], axis = 1)
+#             # Assign correct datatypes to each column
+#             df = df.astype({
+#                 'chrom':'str',
+#                 'start':'int',
+#                 'end':'int',
+#                 'score':'float',
+#                 'strand':'str',
+#                 'depth':'int',
+#                 'num_bases_at_depth':'int',
+#                 'size_of_feature':'int',
+#                 'pros_of_feature_at_depth':'float',
+#                 'ID':'category',
+#                 "exon_number":'category', 
+#                 "unknown":'category', 
+#                 "exon_chrom":"category", 
+#                 "exon_start_pos":"int", 
+#                 "exon_strand":"category"
+#                 }
+#                 )
+#             # Add gene names to the current df
+#             df = df.merge(right=gene_names,
+#                           how='left',
+#                           left_on='ID',
+#                           right_on='name')
             
-            # Join symbols and IDs into one column so they can be visualised as one entity
-            df['symbol_ID'] = df['symbol'] + " " + df['ID'].astype(str)
-            # Sort the symbol_IDs so they aren't randomly presented in the figure
-            df = df.sort_values(by=['symbol_ID'])
+#             # Join symbols and IDs into one column so they can be visualised as one entity
+#             df['symbol_ID'] = df['symbol'] + " " + df['ID'].astype(str)
+#             # Sort the symbol_IDs so they aren't randomly presented in the figure
+#             df = df.sort_values(by=['symbol_ID'])
 
-            # Duplicate rows with several bases, this enables calculating averages in a more easier way
-            df = df.loc[df.index.repeat(df.num_bases_at_depth)] # https://stackoverflow.com/a/57009491
+#             # Duplicate rows with several bases, this enables calculating averages in a more easier way
+#             df = df.loc[df.index.repeat(df.num_bases_at_depth)] # https://stackoverflow.com/a/57009491
             
-            # Create dir for the current sample, into which all the transcript coverage tsv:s end up
-            create_dir_if_not_exist(params.metrics_tables + sample_name)
+#             # Create dir for the current sample, into which all the transcript coverage tsv:s end up
+#             create_dir_if_not_exist(params.metrics_tables + sample_name)
 
-            # Get a list of symbol_IDs so they can be looped through later on
-            transcripts = df['symbol_ID'].unique()
-            # Split the df into "symbol_ID" subgroups
-            grouped_symbol_IDs = df.groupby(df.symbol_ID)
-            # This will hold a list of df:s with depth metrics data such as 
-            transcripts_list = []
+#             # Get a list of symbol_IDs so they can be looped through later on
+#             transcripts = df['symbol_ID'].unique()
+#             # Split the df into "symbol_ID" subgroups
+#             grouped_symbol_IDs = df.groupby(df.symbol_ID)
+#             # This will hold a list of df:s with depth metrics data such as 
+#             transcripts_list = []
             
-            for j in transcripts:
-                c = grouped_symbol_IDs.get_group(j)
-                # Scrape NCBI transcript ID
-                NCBI_id = c.iloc[0]['symbol_ID']
-                c.index.name = "row_no"
-                c.to_csv(params.metrics_tables + sample_name + "/" + NCBI_id.replace(" ", "_") + "_cov.tsv")
-                # Extract metrics values for the depth column
-                c = c.describe()['depth'].to_frame(NCBI_id).T
-                transcripts_list.append(c)
+#             for j in transcripts:
+#                 c = grouped_symbol_IDs.get_group(j)
+#                 # Scrape NCBI transcript ID
+#                 NCBI_id = c.iloc[0]['symbol_ID']
+#                 c.index.name = "row_no"
+#                 c.to_csv(params.metrics_tables + sample_name + "/" + NCBI_id.replace(" ", "_") + "_cov.tsv")
+#                 # Extract metrics values for the depth column
+#                 c = c.describe()['depth'].to_frame(NCBI_id).T
+#                 transcripts_list.append(c)
 
-            # Join all metrics data into one df
-            all_transcripts_metrics = (pd.concat(transcripts_list, axis=0)
-                                       .rename(columns={'count': 'total_length_of_exons'})
-                                       .astype({
-                                             'total_length_of_exons':'int',
-                                             'max':'int',
-                                             'min':'int'}
-                                              ))
+#             # Join all metrics data into one df
+#             all_transcripts_metrics = (pd.concat(transcripts_list, axis=0)
+#                                        .rename(columns={'count': 'total_length_of_exons'})
+#                                        .astype({
+#                                              'total_length_of_exons':'int',
+#                                              'max':'int',
+#                                              'min':'int'}
+#                                               ))
             
-            all_transcripts_metrics.index.name = "ID"
-            # Create bar plots
-            bar_fig = px.bar(all_transcripts_metrics.reset_index(), 
-                             y='mean', 
-                             x='ID', 
-                             hover_data=["total_length_of_exons", "mean", 'std', 'min', '25%', '50%', '75%', 'max',"ID"],
-                             title="Sample name: " + sample_name)
+#             all_transcripts_metrics.index.name = "ID"
+#             # Create bar plots
+#             bar_fig = px.bar(all_transcripts_metrics.reset_index(), 
+#                              y='mean', 
+#                              x='ID', 
+#                              hover_data=["total_length_of_exons", "mean", 'std', 'min', '25%', '50%', '75%', 'max',"ID"],
+#                              title="Sample name: " + sample_name)
             
-            fig_list.append(bar_fig)
-            del df
+#             fig_list.append(bar_fig)
+#             del df
 
-        # Join all metrics tables into one
-        #all_metrics = pd.concat(metrics_df_list, axis=0, ignore_index=True)
-        # Give the index column own name so it looks nice in the csv
-        #all_metrics.index.name = "ID"
+#         # Join all metrics tables into one
+#         #all_metrics = pd.concat(metrics_df_list, axis=0, ignore_index=True)
+#         # Give the index column own name so it looks nice in the csv
+#         #all_metrics.index.name = "ID"
 
-        # https://stackoverflow.com/a/59869358
-        # Write all bar plots into one html page
-        with open(output.bar_plot, 'a') as f:
-            for fig in fig_list:
-                f.write(fig.to_html(full_html=False, 
-                                    include_plotlyjs='cdn', 
-                                    config= {'displaylogo': False}))
+#         # https://stackoverflow.com/a/59869358
+#         # Write all bar plots into one html page
+#         with open(output.bar_plot, 'a') as f:
+#             for fig in fig_list:
+#                 f.write(fig.to_html(full_html=False, 
+#                                     include_plotlyjs='cdn', 
+#                                     config= {'displaylogo': False}))
